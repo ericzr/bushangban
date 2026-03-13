@@ -191,17 +191,28 @@ export function Island() {
           const isEntering = enteringId === bubble.id;
           const isTalent = bubble.type === 'talent';
 
+          // 环形进度条参数
+          const svgSize = size + 6; // SVG 比气泡大一圈
+          const radius = size / 2 + 1;
+          const circumference = 2 * Math.PI * radius;
+          const progressOffset = circumference * (1 - bubble.matchScore / 100);
+
+          // 人才昵称简称：取最后1-2个字
+          const shortName = isTalent
+            ? (bubble.title.length >= 2 ? bubble.title.slice(-2) : bubble.title)
+            : '';
+
           return (
             <button
               key={bubble.id}
               onClick={() => setSelectedBubble(bubble)}
               className={cn(
                 'absolute rounded-full flex items-center justify-center cursor-pointer',
-                'border-2 shadow-sm',
+                'shadow-sm',
                 'hover:scale-110 active:scale-95',
                 isTalent
-                  ? 'bg-emerald-50/90 border-emerald-300/60'
-                  : 'bg-amber-50/90 border-amber-300/60',
+                  ? 'bg-emerald-50/90'
+                  : 'bg-amber-50/90',
                 isEntering && 'animate-[bubble-pop_0.6s_ease-out]'
               )}
               style={{
@@ -216,6 +227,37 @@ export function Island() {
                   : '0 3px 14px rgba(245,158,11,0.2)',
               }}
             >
+              {/* 环形进度条描边 */}
+              <svg
+                className="absolute inset-0 -rotate-90"
+                width={svgSize}
+                height={svgSize}
+                style={{ left: -(svgSize - size) / 2, top: -(svgSize - size) / 2 }}
+              >
+                {/* 底色轨道 */}
+                <circle
+                  cx={svgSize / 2}
+                  cy={svgSize / 2}
+                  r={radius}
+                  fill="none"
+                  stroke={isTalent ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)'}
+                  strokeWidth={2.5}
+                />
+                {/* 进度弧线 */}
+                <circle
+                  cx={svgSize / 2}
+                  cy={svgSize / 2}
+                  r={radius}
+                  fill="none"
+                  stroke={isTalent ? '#10b981' : '#f59e0b'}
+                  strokeWidth={2.5}
+                  strokeLinecap="round"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={progressOffset}
+                  style={{ transition: 'stroke-dashoffset 0.8s ease-out' }}
+                />
+              </svg>
+
               {bubble.avatar ? (
                 <img
                   src={bubble.avatar}
@@ -230,14 +272,14 @@ export function Island() {
                   {bubble.title.length > 4 ? bubble.title.slice(0, 4) + '…' : bubble.title}
                 </span>
               )}
-              {/* 类型小标签 */}
+              {/* 底部标签：人才显示昵称简称，任务显示"任务" */}
               <span className={cn(
                 'absolute -bottom-1.5 left-1/2 -translate-x-1/2 rounded-full px-1.5 py-px text-[8px] whitespace-nowrap shadow-sm',
                 isTalent
                   ? 'bg-emerald-500 text-white'
                   : 'bg-amber-500 text-white'
               )}>
-                {isTalent ? '人才' : '任务'}
+                {isTalent ? shortName : '任务'}
               </span>
             </button>
           );
