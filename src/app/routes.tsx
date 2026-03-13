@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet, useLocation } from "react-router";
+import { createHashRouter, Outlet, useLocation } from "react-router";
 import { Navbar } from "./components/Navbar";
 import { Home } from "./pages/Home";
 import { Talents } from "./pages/Talents";
@@ -33,7 +33,7 @@ function Layout() {
   );
 }
 
-export const router = createBrowserRouter([
+export const router = createHashRouter([
   {
     path: "/",
     Component: Layout,
