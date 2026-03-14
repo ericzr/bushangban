@@ -2,15 +2,17 @@ import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useState } from 'react';
 import { MOCK_TALENTS, SKILL_CATEGORIES } from '../data/mock';
 import { cn } from '../../lib/utils';
-import { Star, ChevronDown, FileText, Sparkles, Heart, MessageCircle } from 'lucide-react';
+import { Star, FileText, Heart, MessageCircle, Briefcase, CheckCircle2, TrendingUp } from 'lucide-react';
+
+// 人才广场专用角色分类 Tab
+const TALENT_TABS = ['推荐', '设计师', '开发者', '创作者', '视频', '插画'];
 
 export function Talents() {
-  const [activeCategory, setActiveCategory] = useState('全部');
+  const [activeTab, setActiveTab] = useState('推荐');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [followedIds, setFollowedIds] = useState<Set<string>>(new Set());
 
-  // Read filter params from URL
   const filterIdentity = searchParams.get('identity') || '全部';
   const filterCity = searchParams.get('city') || '全部';
   const filterAccept = searchParams.get('accept') || '全部';
@@ -32,173 +34,148 @@ export function Talents() {
   };
 
   const filteredTalents = MOCK_TALENTS.filter(t => {
-    // Category filter
-    if (activeCategory !== '全部') {
-      const match = t.acceptTypes.some(type => type.includes(activeCategory)) || t.user.skills.some(s => s.name.includes(activeCategory));
+    // Tab filter by role keyword
+    if (activeTab !== '推荐') {
+      const match = t.user.role.includes(activeTab) || t.acceptTypes.some(type => type.includes(activeTab)) || t.user.skills.some(s => s.name.includes(activeTab));
       if (!match) return false;
     }
-    // Identity filter
     if (filterIdentity !== '全部' && t.user.identity !== filterIdentity) return false;
-    // City filter
     if (filterCity !== '全部' && t.user.city !== filterCity) return false;
-    // Accept type filter
     if (filterAccept !== '全部' && !t.acceptTypes.includes(filterAccept)) return false;
     return true;
   });
 
-  const hasActiveFilter = filterIdentity !== '全部' || filterCity !== '全部' || filterAccept !== '全部';
-
   return (
     <div className="flex flex-col pb-4">
-      {/* Category Tabs — same style as Home */}
-      <div className="sticky z-30 bg-[var(--background)] border-b border-border" style={{ top: 'calc(var(--safe-top) + 3.5rem)' }}>
-        <div className="flex gap-2 overflow-x-auto px-4 py-2.5 scrollbar-hide">
-          {SKILL_CATEGORIES.map(cat => (
+      {/* Underline Tab Bar — 人才广场专属样式 */}
+      <div className="px-4 pt-2 pb-0">
+        <div className="flex gap-0 border-b border-border">
+          {TALENT_TABS.map(tab => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
+              key={tab}
+              onClick={() => setActiveTab(tab)}
               className={cn(
-                'flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs transition-colors whitespace-nowrap',
-                activeCategory === cat
-                  ? 'bg-foreground text-background'
-                  : 'bg-secondary text-foreground hover:bg-secondary/80'
+                'relative px-3 py-2.5 text-sm transition-colors whitespace-nowrap',
+                activeTab === tab
+                  ? 'text-emerald-600 font-semibold'
+                  : 'text-muted-foreground'
               )}
             >
-              {cat}
+              {tab}
+              {activeTab === tab && (
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 w-5 rounded-full bg-emerald-500" />
+              )}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Active Filter Indicator */}
-      {hasActiveFilter && (
-        <div className="flex items-center gap-2 px-4 py-2 text-xs text-muted-foreground">
-          <span>筛选中：</span>
-          {filterIdentity !== '全部' && <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5">{filterIdentity}</span>}
-          {filterCity !== '全部' && <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5">{filterCity}</span>}
-          {filterAccept !== '全部' && <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5">{filterAccept}</span>}
-        </div>
-      )}
-
-      {/* Talent Cards */}
-      <div className="flex flex-col gap-3 px-4 pt-2">
-        {filteredTalents.map(talent => {
-          const { user, acceptTypes, matchScore } = talent;
-          const isFollowed = followedIds.has(talent.id);
-          return (
-            <Link key={talent.id} to={`/talent/${talent.id}`} className="block rounded-2xl bg-white p-4 border border-border active:scale-[0.98] transition-transform">
-              <div className="flex gap-3">
-                {/* Avatar */}
-                <div className="relative flex-shrink-0">
-                  <img src={user.avatar} alt={user.name} className="h-14 w-14 rounded-2xl object-cover ring-1 ring-border" />
-                  {user.isOnline && (
-                    <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-background bg-success" />
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm text-foreground">{user.name}</h3>
-                      <span className={cn(
-                        'rounded-full px-1.5 py-0.5 text-[10px]',
-                        user.identity === '学生' ? 'bg-info-light text-info' :
-                        user.identity === '自由职业' ? 'bg-success-light text-success' :
-                        'bg-purple-light text-purple'
-                      )}>
-                        {user.identity}
-                      </span>
+      {/* Talent Cards — 名片式布局 */}
+      <div className="flex flex-col gap-3 px-4 pt-3">
+        {filteredTalents.length === 0 ? (
+          <div className="py-20 text-center text-muted-foreground">没有找到匹配的人才</div>
+        ) : (
+          filteredTalents.map(talent => {
+            const isFollowed = followedIds.has(talent.id);
+            return (
+              <Link key={talent.id} to={`/talent/${talent.id}`} className="block">
+                <div className="group rounded-2xl bg-white border border-emerald-100 p-4 transition-all active:scale-[0.98]">
+                  {/* Top: Avatar + Info + Follow */}
+                  <div className="flex items-start gap-3.5">
+                    {/* Large Avatar */}
+                    <div className="relative flex-shrink-0">
+                      <img
+                        src={talent.user.avatar}
+                        alt={talent.user.name}
+                        className="h-14 w-14 rounded-2xl object-cover ring-1 ring-emerald-200/60"
+                      />
+                      {talent.user.isOnline && (
+                        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
+                      )}
                     </div>
-                    <div className={cn(
-                      'flex items-center gap-1 rounded-full px-2 py-0.5 text-xs',
-                      matchScore >= 80 ? 'bg-match-high-bg text-match-high' :
-                      matchScore >= 60 ? 'bg-match-mid-bg text-match-mid' :
-                      'bg-match-low-bg text-match-low'
-                    )}>
-                      <Sparkles className="h-3 w-3" />
-                      <span>匹配 {matchScore}%</span>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-[15px] font-semibold text-foreground truncate">{talent.user.name}</h3>
+                        <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 flex-shrink-0">
+                          {talent.user.role}
+                        </span>
+                      </div>
+                      <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>{talent.user.city}</span>
+                        <span>·</span>
+                        <span>{talent.user.identity}</span>
+                        <span>·</span>
+                        <div className="flex items-center gap-0.5">
+                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                          <span className="text-foreground font-medium">{talent.rating}</span>
+                        </div>
+                      </div>
+
+                      {/* Skills */}
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {talent.user.skills.slice(0, 4).map(skill => (
+                          <span key={skill.name} className="rounded-full bg-emerald-50/80 px-2 py-0.5 text-[11px] text-emerald-700">
+                            {skill.name}
+                          </span>
+                        ))}
+                      </div>
                     </div>
+
+                    {/* Follow Button */}
+                    <button
+                      onClick={(e) => toggleFollow(e, talent.id)}
+                      className={cn(
+                        'flex-shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+                        isFollowed
+                          ? 'bg-secondary text-muted-foreground'
+                          : 'bg-emerald-500 text-white'
+                      )}
+                    >
+                      {isFollowed ? '已关注' : '关注'}
+                    </button>
                   </div>
 
-                  <p className="text-xs text-muted-foreground mt-0.5">{user.role} · {user.city}</p>
-
-                  {/* Rating */}
-                  <div className="flex items-center gap-1 mt-1">
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={cn(
-                            'h-3 w-3',
-                            i < Math.floor(user.rating)
-                              ? 'fill-warning text-warning'
-                              : 'fill-secondary text-secondary'
-                          )}
-                        />
-                      ))}
+                  {/* Stats Bar */}
+                  <div className="mt-3 flex items-center justify-between rounded-xl bg-emerald-50/50 px-3 py-2">
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <Briefcase className="h-3.5 w-3.5 text-emerald-500" />
+                      <span className="font-semibold text-foreground">{talent.completedProjects}</span>
+                      <span className="text-muted-foreground">项目</span>
                     </div>
-                    <span className="text-xs text-muted-foreground">{user.rating}</span>
-                    <span className="text-xs text-muted-foreground">· {user.completedProjects}个项目</span>
-                  </div>
-
-                  {/* Skills */}
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {user.skills.slice(0, 4).map(skill => (
-                      <span
-                        key={skill.name}
-                        className={cn(
-                          'rounded-full px-2 py-0.5 text-[10px]',
-                          skill.level === '专业' ? 'bg-primary/10 text-foreground' :
-                          skill.level === '熟练' ? 'bg-success-light text-success' :
-                          'bg-secondary text-muted-foreground'
-                        )}
-                      >
-                        {skill.name}
-                        {skill.level === '专业' && <Star className="h-2.5 w-2.5 inline fill-warning text-warning ml-0.5" />}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Accept Types */}
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-xs text-muted-foreground">接单：</span>
-                    <div className="flex gap-1">
-                      {acceptTypes.slice(0, 3).map(type => (
-                        <span key={type} className="text-xs text-foreground">{type}</span>
-                      ))}
+                    <div className="h-3 w-px bg-emerald-200" />
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                      <span className="font-semibold text-foreground">{talent.completionRate}%</span>
+                      <span className="text-muted-foreground">履约</span>
                     </div>
+                    <div className="h-3 w-px bg-emerald-200" />
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+                      <span className="font-semibold text-foreground">{talent.rating}</span>
+                      <span className="text-muted-foreground">评分</span>
+                    </div>
+                    <div className="h-3 w-px bg-emerald-200" />
+                    <button
+                      onClick={handleChat}
+                      className="flex items-center gap-1 rounded-full bg-emerald-500 px-3 py-1 text-[11px] font-medium text-white"
+                    >
+                      <MessageCircle className="h-3 w-3" />
+                      沟通
+                    </button>
                   </div>
                 </div>
-              </div>
-
-              {/* Footer */}
-              <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-                <div className="flex items-center gap-2">
-                  {user.tags.map(tag => (
-                    <span key={tag} className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-foreground">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={(e) => toggleFollow(e, talent.id)} className={cn('rounded-full px-3 py-1 text-xs transition-colors', isFollowed ? 'bg-secondary text-muted-foreground' : 'bg-secondary text-foreground hover:bg-primary hover:text-primary-foreground')}>
-                    {isFollowed ? '已关注' : '关注'}
-                  </button>
-                  <button onClick={handleChat} className="rounded-full bg-primary px-3 py-1 text-xs text-primary-foreground hover:bg-primary/80 transition-colors">
-                    沟通
-                  </button>
-                </div>
-              </div>
-            </Link>
-          );
-        })}
+              </Link>
+            );
+          })
+        )}
       </div>
 
       {/* Floating Resume Button */}
       <Link
         to="/profile"
-        className="fixed bottom-22 right-5 z-40 flex items-center gap-1.5 rounded-full bg-primary px-4 py-3 text-primary-foreground shadow-lg hover:scale-105 transition-transform"
+        className="fixed bottom-22 right-5 z-40 flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-3 text-white shadow-lg hover:scale-105 transition-transform"
       >
         <FileText className="h-4 w-4" />
         <span className="text-sm">我的简历</span>

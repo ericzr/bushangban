@@ -31,8 +31,7 @@ export function Home() {
       if (range && (task.budgetMax < range.min || task.budgetMin > range.max)) return false;
     }
     if (filterType !== '全部') {
-      const typeMap: Record<string, string> = { '长期': 'long-term', '短期': 'short-term', '兼职': 'part-time', '全职': 'full-time' };
-      if (typeMap[filterType] && task.type !== typeMap[filterType]) return false;
+      if (task.type !== filterType) return false;
     }
     return true;
   });
