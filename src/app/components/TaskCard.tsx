@@ -11,14 +11,14 @@ interface TaskCardProps {
   className?: string;
 }
 
-// 任务类型对应的竖条颜色
-const TYPE_COLORS: Record<string, string> = {
+// 左侧竖条颜色（唯一的色彩差异点）
+const TYPE_BAR: Record<string, string> = {
   '长期': 'bg-blue-500',
   '兼职': 'bg-amber-500',
   '项目制': 'bg-orange-500',
 };
 
-const TYPE_BADGE_COLORS: Record<string, string> = {
+const TYPE_BADGE: Record<string, string> = {
   '长期': 'bg-blue-50 text-blue-600',
   '兼职': 'bg-amber-50 text-amber-600',
   '项目制': 'bg-orange-50 text-orange-600',
@@ -38,12 +38,11 @@ export function TaskCard({ task, className }: TaskCardProps) {
   return (
     <Link to={`/task/${task.id}`} className="block">
       <div className={cn(
-        'group flex overflow-hidden rounded-2xl bg-white transition-all active:scale-[0.98]',
-        'border border-amber-100',
+        'group flex overflow-hidden rounded-2xl bg-white border border-border transition-all active:scale-[0.98]',
         className
       )}>
-        {/* Left Color Bar */}
-        <div className={cn('w-1 flex-shrink-0', TYPE_COLORS[task.type] || 'bg-amber-400')} />
+        {/* Left Color Bar — 按任务类型着色 */}
+        <div className={cn('w-1 flex-shrink-0', TYPE_BAR[task.type] || 'bg-muted-foreground')} />
 
         {/* Content */}
         <div className="flex flex-1 flex-col gap-2.5 p-4">
@@ -71,7 +70,7 @@ export function TaskCard({ task, className }: TaskCardProps) {
             {/* Type Badge */}
             <span className={cn(
               'rounded-md px-2 py-0.5 text-[11px] font-medium',
-              TYPE_BADGE_COLORS[task.type] || 'bg-amber-50 text-amber-600'
+              TYPE_BADGE[task.type] || 'bg-secondary text-muted-foreground'
             )}>
               {task.type}
             </span>
@@ -90,7 +89,7 @@ export function TaskCard({ task, className }: TaskCardProps) {
           {/* Tags */}
           <div className="flex flex-wrap gap-1.5">
             {task.tags.map(tag => (
-              <span key={tag} className="inline-flex items-center gap-0.5 rounded-full bg-amber-50/80 px-2 py-0.5 text-[11px] text-amber-700">
+              <span key={tag} className="inline-flex items-center gap-0.5 rounded-full bg-secondary px-2 py-0.5 text-[11px] text-foreground">
                 <Tag className="h-2.5 w-2.5" />
                 {tag}
               </span>
@@ -118,7 +117,7 @@ export function TaskCard({ task, className }: TaskCardProps) {
             </div>
 
             <div className="text-right">
-              <span className="text-sm font-semibold text-amber-600">
+              <span className="text-sm font-semibold text-foreground">
                 ¥{task.budgetMin.toLocaleString()}-{task.budgetMax.toLocaleString()}
               </span>
             </div>
