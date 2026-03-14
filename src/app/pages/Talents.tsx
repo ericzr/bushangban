@@ -175,7 +175,7 @@ export function Talents() {
       {/* Floating Resume Button */}
       <Link
         to="/profile"
-        className="fixed bottom-22 right-5 z-40 flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-3 text-white shadow-lg hover:scale-105 transition-transform"
+        className="fixed bottom-20 right-4 z-40 flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white shadow-lg hover:bg-emerald-600 transition-colors"
       >
         <FileText className="h-4 w-4" />
         <span className="text-sm">我的简历</span>
