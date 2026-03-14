@@ -128,7 +128,7 @@ export function Talents() {
                         'flex-shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
                         isFollowed
                           ? 'bg-secondary text-muted-foreground'
-                          : 'bg-foreground text-background'
+                          : 'border border-border text-foreground hover:bg-secondary'
                       )}
                     >
                       {isFollowed ? '已关注' : '关注'}
@@ -157,7 +157,7 @@ export function Talents() {
                     <div className="h-3 w-px bg-border" />
                     <button
                       onClick={handleChat}
-                      className="flex items-center gap-1 rounded-full bg-foreground px-3 py-1 text-[11px] font-medium text-background"
+                      className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-[11px] font-medium text-foreground hover:bg-secondary"
                     >
                       <MessageCircle className="h-3 w-3" />
                       沟通
