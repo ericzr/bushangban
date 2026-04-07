@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MOCK_PLANETS, MOCK_BUBBLES, WORLD_MESSAGES, type Bubble, type Planet } from '../data/mock';
+import { MOCK_PLANETS, MOCK_BUBBLES, WORLD_MESSAGES, MOCK_TASKS, type Bubble, type Planet } from '../data/mock';
 import { cn } from '../../lib/utils';
 import { X, Zap, Send, Megaphone, ShoppingBag, Volume2, ArrowUpToLine, Image, Sparkles, Bot } from 'lucide-react';
 import { useNavigate } from 'react-router';
@@ -393,12 +393,27 @@ export function Island() {
               >
                 查看详情
               </button>
-              <button
-                onClick={() => { setSelectedBubble(null); navigate('/messages'); }}
-                className="flex-1 rounded-xl bg-primary py-2.5 text-sm text-primary-foreground hover:bg-primary/80 transition-colors"
-              >
-                立即沟通
-              </button>
+              {(() => {
+                const refTask = selectedBubble.type !== 'talent' ? MOCK_TASKS.find(t => t.id === selectedBubble.refId) : null;
+                const isInstantType = selectedBubble.type === 'agent' || (refTask && refTask.type === 'crowdsourcing');
+                return isInstantType ? (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setSelectedBubble(null); }}
+                    className={cn('flex-1 rounded-xl py-2.5 text-sm font-medium text-white transition-colors',
+                      selectedBubble.type === 'agent' ? 'bg-rose-500 hover:bg-rose-600' : 'bg-teal-500 hover:bg-teal-600'
+                    )}
+                  >
+                    接单
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { setSelectedBubble(null); navigate('/messages'); }}
+                    className="flex-1 rounded-xl bg-primary py-2.5 text-sm text-primary-foreground hover:bg-primary/80 transition-colors"
+                  >
+                    立即沟通
+                  </button>
+                );
+              })()}
             </div>
           </div>
         </div>
