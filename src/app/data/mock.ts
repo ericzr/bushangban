@@ -484,7 +484,7 @@ export interface Banner {
 }
 
 export const MOCK_BANNERS: Banner[] = [
-  { id: 'bn1', title: '雇佣人类Agent', subtitle: '让专业的人为你持续服务', gradient: 'from-rose-500 to-purple-600', link: '/?taskType=agent' },
+  { id: 'bn1', title: '雇佣人类', subtitle: '即时发布需求，真人快速响应', gradient: 'from-rose-500 to-purple-600', link: '/?taskType=agent' },
   { id: 'bn2', title: '众包任务大厅', subtitle: '按结果付费，分阶段交付', gradient: 'from-purple-500 to-indigo-600', link: '/?taskType=crowdsourcing' },
   { id: 'bn3', title: '灵活兼职', subtitle: '自由安排时间，轻松赚外快', gradient: 'from-amber-500 to-orange-600', link: '/?taskType=parttime' },
 ];
