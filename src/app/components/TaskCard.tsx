@@ -35,7 +35,9 @@ export function TaskCard({ task, className }: TaskCardProps) {
   const typeConfig = TASK_TYPE_CONFIG[task.type];
   const typeLabel = getTaskTypeLabel(task.type, task.subType);
   const TypeIcon = TYPE_ICON[task.type] || Tag;
-  const isInstantType = task.type === 'crowdsourcing' || task.type === 'agent';
+  const isAgentType = task.type === 'agent';
+  const isCrowdsourcing = task.type === 'crowdsourcing';
+  const isInstantType = isAgentType || (isCrowdsourcing && task.isInstant);
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -82,8 +84,8 @@ export function TaskCard({ task, className }: TaskCardProps) {
           {/* Description */}
           <p className="text-xs leading-relaxed text-muted-foreground line-clamp-2">{task.description}</p>
 
-          {/* Instant / Delivery mode badges for crowdsourcing & agent */}
-          {isInstantType && (
+          {/* Delivery mode / instant badges for crowdsourcing & agent */}
+          {(isAgentType || isCrowdsourcing) && (
             <div className="flex items-center gap-2 flex-wrap">
               {task.isInstant && (
                 <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-50 text-amber-600 px-2 py-0.5 text-[11px] font-medium">
@@ -120,9 +122,9 @@ export function TaskCard({ task, className }: TaskCardProps) {
             ))}
           </div>
 
-          {/* Milestones preview (only for non-instant types) */}
-          {!isInstantType && task.milestones && task.milestones.length > 0 && (
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+          {/* Milestones preview */}
+          {task.milestones && task.milestones.length > 0 && (
+            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
               <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden flex">
                 {task.milestones.map((ms, i) => (
                   <div
@@ -136,7 +138,7 @@ export function TaskCard({ task, className }: TaskCardProps) {
                   />
                 ))}
               </div>
-              <span>{task.milestones.length}个里程碑</span>
+              <span className="flex-shrink-0">{task.milestones.length}个里程碑 · 分{task.milestones.length}期交付</span>
             </div>
           )}
 
@@ -147,14 +149,14 @@ export function TaskCard({ task, className }: TaskCardProps) {
                 <Heart className={cn('h-3.5 w-3.5', liked && 'fill-coral')} /><span>{likeCount}</span>
               </button>
               <span className="flex items-center gap-1 text-xs"><MessageCircle className="h-3.5 w-3.5" /><span>{task.comments}</span></span>
-              <span className="text-xs">{task.applicants}人{isInstantType ? '接单' : '申请'}</span>
+              <span className="text-xs">{task.applicants}人{(isAgentType || isCrowdsourcing) ? '接单' : '申请'}</span>
             </div>
-            {isInstantType ? (
+            {(isAgentType || isCrowdsourcing) ? (
               <div className="flex items-center gap-2">
                 <PriceLabel task={task} />
                 <button
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                  className={cn('rounded-full px-3 py-1 text-xs font-medium text-white', task.type === 'agent' ? 'bg-rose-500' : 'bg-teal-500')}
+                  className={cn('rounded-full px-3 py-1 text-xs font-medium text-white', isAgentType ? 'bg-rose-500' : 'bg-teal-500')}
                 >
                   接单
                 </button>

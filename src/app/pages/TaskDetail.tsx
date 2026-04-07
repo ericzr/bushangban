@@ -61,7 +61,9 @@ export function TaskDetail() {
     setCommentText('');
   };
 
-  const isInstantType = task.type === 'crowdsourcing' || task.type === 'agent';
+  const isAgentType = task.type === 'agent';
+  const isCrowdsourcing = task.type === 'crowdsourcing';
+  const isInstantType = isAgentType || (isCrowdsourcing && task.isInstant);
   const typeConfig = TASK_TYPE_CONFIG[task.type];
   const typeLabel = getTaskTypeLabel(task.type, task.subType);
 
@@ -122,7 +124,7 @@ export function TaskDetail() {
                 <Zap className="h-3 w-3" />即时
               </span>
             )}
-            {isInstantType && task.deliveryMode && (
+            {(isAgentType || isCrowdsourcing) && task.deliveryMode && (
               <span className={cn('inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium',
                 task.deliveryMode === 'offline' ? 'bg-teal-50 text-teal-600' : 'bg-blue-50 text-blue-600'
               )}>
@@ -180,6 +182,41 @@ export function TaskDetail() {
           <h3 className="text-sm text-foreground mb-2">项目介绍</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">{task.description}</p>
         </div>
+
+        {/* Milestones — delivery & payment rhythm */}
+        {task.milestones && task.milestones.length > 0 && (
+          <div className="mb-4">
+            <h3 className="text-sm text-foreground mb-2">交付里程碑</h3>
+            <div className="rounded-2xl bg-white border border-border overflow-hidden">
+              {task.milestones.map((ms, i) => (
+                <div key={ms.id} className={cn('flex items-center gap-3 px-4 py-3', i > 0 && 'border-t border-border')}>
+                  <div className={cn('flex items-center justify-center h-6 w-6 rounded-full text-[10px] font-semibold flex-shrink-0',
+                    ms.status === 'completed' ? 'bg-success text-white'
+                    : ms.status === 'in-progress' ? 'bg-info text-white'
+                    : 'bg-secondary text-muted-foreground'
+                  )}>
+                    {ms.status === 'completed' ? '✓' : i + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-foreground truncate">{ms.name}</p>
+                    <p className="text-[11px] text-muted-foreground">占比 {ms.percentage}%</p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-sm font-medium text-foreground">¥{ms.amount.toLocaleString()}</p>
+                    <p className={cn('text-[10px]',
+                      ms.isPaid ? 'text-success' : ms.status === 'completed' ? 'text-amber-500' : 'text-muted-foreground'
+                    )}>
+                      {ms.isPaid ? '已打款' : ms.status === 'completed' ? '待打款' : '验收后付'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-2 px-1">
+              共 {task.milestones.length} 个里程碑，每阶段验收通过后打款，保障双方权益
+            </p>
+          </div>
+        )}
 
         {/* Skill Requirements */}
         <div className="mb-4">
@@ -241,11 +278,14 @@ export function TaskDetail() {
 
       {/* Bottom Action Bar */}
       <div className="fixed bottom-16 left-0 right-0 z-40 flex gap-3 bg-white/90 backdrop-blur-md px-4 py-3 border-t border-border">
-        {isInstantType ? (
+        {(isAgentType || isCrowdsourcing) ? (
           <>
             <div className="flex flex-col justify-center">
               <p className="text-base font-semibold text-foreground">¥{task.budgetMin.toLocaleString()}-{task.budgetMax.toLocaleString()}</p>
-              {task.estimatedDuration && <p className="text-[10px] text-muted-foreground">{task.estimatedDuration}</p>}
+              {task.estimatedDuration
+                ? <p className="text-[10px] text-muted-foreground">{task.estimatedDuration}</p>
+                : task.milestones && <p className="text-[10px] text-muted-foreground">{task.milestones.length}期交付</p>
+              }
             </div>
             <button
               onClick={handleAcceptOrder}
@@ -253,7 +293,7 @@ export function TaskDetail() {
               className={cn('flex items-center justify-center gap-1.5 flex-1 rounded-xl py-2.5 text-sm font-medium transition-colors shadow-sm',
                 accepted
                   ? 'bg-success-light text-success'
-                  : task.type === 'agent'
+                  : isAgentType
                     ? 'bg-rose-500 text-white hover:bg-rose-600'
                     : 'bg-teal-500 text-white hover:bg-teal-600'
               )}

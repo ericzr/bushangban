@@ -252,11 +252,17 @@ export const MOCK_TASKS: Task[] = [
     ],
   },
   {
-    id: 't2', title: '小程序前端开发（电商类）', type: 'crowdsourcing', priceType: 'total',
+    id: 't2', title: '小程序前端开发（电商类）', type: 'crowdsourcing', priceType: 'milestone',
     description: '需要一位有经验的小程序开发者，完成一个电商小程序的前端开发。已有UI稿和后端接口，预计2-3周工期。',
     budgetMin: 8000, budgetMax: 12000, tags: ['开发', '小程序', '电商'], status: 'open',
     author: users[1], createdAt: '2026-03-02T15:30:00Z', applicants: 3, likes: 15, comments: 4,
     matchScore: 78, deadline: '2026-03-25', location: '远程', skillRequirements: ['小程序', 'React', 'TypeScript'],
+    milestones: [
+      { id: 'ms7', name: '页面框架搭建', percentage: 30, amount: 3000, status: 'pending', isPaid: false },
+      { id: 'ms8', name: '核心功能开发', percentage: 40, amount: 4000, status: 'pending', isPaid: false },
+      { id: 'ms9', name: '联调与上线', percentage: 30, amount: 3000, status: 'pending', isPaid: false },
+    ],
+    deliveryMode: 'online', isInstant: false,
   },
   {
     id: 't3', title: '小红书种草文案撰写（长期兼职）', type: 'parttime', priceType: 'hourly',
@@ -289,11 +295,17 @@ export const MOCK_TASKS: Task[] = [
     deliveryMode: 'online', isInstant: false,
   },
   {
-    id: 't6', title: 'React后台管理系统开发', type: 'crowdsourcing', priceType: 'total',
+    id: 't6', title: 'React后台管理系统开发', type: 'crowdsourcing', priceType: 'milestone',
     description: '需要基于React+Ant Design开发一个企业级后台管理系统，包含权限管理、数据看板、CRUD模块。需要有丰富的后台开发经验。',
     budgetMin: 15000, budgetMax: 25000, tags: ['开发', 'React', '后台'], status: 'open',
     author: users[3], createdAt: '2026-03-03T16:00:00Z', applicants: 4, likes: 12, comments: 3,
     matchScore: 71, deadline: '2026-05-01', location: '深圳优先', skillRequirements: ['React', 'Node.js', 'TypeScript'],
+    milestones: [
+      { id: 'ms10', name: '权限与框架搭建', percentage: 25, amount: 5000, status: 'pending', isPaid: false },
+      { id: 'ms11', name: '数据看板模块', percentage: 25, amount: 5000, status: 'pending', isPaid: false },
+      { id: 'ms12', name: 'CRUD业务模块', percentage: 30, amount: 6000, status: 'pending', isPaid: false },
+      { id: 'ms13', name: '联调与交付', percentage: 20, amount: 4000, status: 'pending', isPaid: false },
+    ],
     deliveryMode: 'online', isInstant: false,
   },
   {
