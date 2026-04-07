@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { MOCK_PLANETS, MOCK_BUBBLES, WORLD_MESSAGES, type Bubble, type Planet } from '../data/mock';
 import { cn } from '../../lib/utils';
-import { X, Zap, Send, Megaphone, ShoppingBag, Volume2, ArrowUpToLine, Image, Sparkles, CheckCircle2 } from 'lucide-react';
+import { X, Zap, Send, Megaphone, ShoppingBag, Volume2, ArrowUpToLine, Image, Sparkles, Bot } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
-// 商城道具数据
 const SHOP_ITEMS = [
   {
     id: 'full-screen-broadcast',
@@ -38,6 +37,39 @@ const SHOP_ITEMS = [
   },
 ];
 
+const BUBBLE_STYLE: Record<Bubble['type'], { bg: string; ring: string; label: string; labelBg: string; dotColor: string; shadowColor: string }> = {
+  talent: {
+    bg: 'bg-emerald-50/90',
+    ring: 'ring-emerald-200',
+    label: '求职者',
+    labelBg: 'bg-emerald-500 text-white',
+    dotColor: 'bg-emerald-400',
+    shadowColor: 'rgba(16,185,129,0.2)',
+  },
+  task: {
+    bg: 'bg-amber-50/90',
+    ring: 'ring-amber-200',
+    label: '任务',
+    labelBg: 'bg-amber-500 text-white',
+    dotColor: 'bg-amber-400',
+    shadowColor: 'rgba(245,158,11,0.2)',
+  },
+  agent: {
+    bg: 'bg-rose-50/90',
+    ring: 'ring-rose-200',
+    label: 'Agent',
+    labelBg: 'bg-rose-500 text-white',
+    dotColor: 'bg-rose-400',
+    shadowColor: 'rgba(244,63,94,0.2)',
+  },
+};
+
+const STROKE_COLORS: Record<Bubble['type'], { track: string; progress: string }> = {
+  talent:  { track: 'rgba(16,185,129,0.15)', progress: '#10b981' },
+  task:    { track: 'rgba(245,158,11,0.15)', progress: '#f59e0b' },
+  agent:   { track: 'rgba(244,63,94,0.15)',  progress: '#f43f5e' },
+};
+
 export function Island() {
   const navigate = useNavigate();
   const [selectedPlanet, setSelectedPlanet] = useState<Planet>(MOCK_PLANETS[0]);
@@ -45,36 +77,23 @@ export function Island() {
   const [currentMsg, setCurrentMsg] = useState(0);
   const [showMatchAnim, setShowMatchAnim] = useState(false);
   const [broadcastText, setBroadcastText] = useState('');
-  const [showBroadcastInput, setShowBroadcastInput] = useState(false);
-  const [broadcastMessages, setBroadcastMessages] = useState<string[]>([]);
   const [allMessages, setAllMessages] = useState<string[]>([...WORLD_MESSAGES]);
   const [showSentToast, setShowSentToast] = useState(false);
   const [showShop, setShowShop] = useState(false);
   const [purchasedItem, setPurchasedItem] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // ---- 气泡散布坐标（人才和任务交错混合分布） ----
   const BUBBLE_POSITIONS: { x: number; y: number }[] = [
-    { x: 15, y: 22 },  // b1 talent
-    { x: 68, y: 65 },  // b2 task
-    { x: 42, y: 8 },   // b3 talent
-    { x: 82, y: 30 },  // b4 task
-    { x: 28, y: 68 },  // b5 talent
-    { x: 58, y: 42 },  // b6 task
-    { x: 8, y: 48 },   // b7 talent
-    { x: 78, y: 82 },  // b8 task
-    { x: 50, y: 78 },  // b9 talent
-    { x: 88, y: 12 },  // b10 task
+    { x: 15, y: 22 }, { x: 68, y: 65 }, { x: 42, y: 8 }, { x: 82, y: 30 },
+    { x: 28, y: 68 }, { x: 58, y: 42 }, { x: 8, y: 48 }, { x: 78, y: 82 },
+    { x: 50, y: 78 }, { x: 88, y: 12 },
   ];
 
-  // 当前星球的气泡
   const planetBubbles = MOCK_BUBBLES.filter(b => b.planetId === selectedPlanet.id);
 
-  // 逐个飘入气泡 + 循环补充新气泡的效果
   const [visibleBubbles, setVisibleBubbles] = useState<Set<string>>(new Set());
   const [enteringId, setEnteringId] = useState<string | null>(null);
 
-  // 切换星球时重置气泡动画
   useEffect(() => {
     setVisibleBubbles(new Set());
     setEnteringId(null);
@@ -94,7 +113,6 @@ export function Island() {
     return () => clearInterval(timer);
   }, [selectedPlanet.id]);
 
-  // World message rotation
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentMsg(prev => (prev + 1) % allMessages.length);
@@ -111,11 +129,8 @@ export function Island() {
     if (!broadcastText.trim()) return;
     const newMsg = `[广播] 我：${broadcastText.trim()}`;
     setAllMessages(prev => [newMsg, ...prev]);
-    setBroadcastMessages(prev => [newMsg, ...prev]);
     setBroadcastText('');
-    setShowBroadcastInput(false);
     setCurrentMsg(0);
-    // Show toast
     setShowSentToast(true);
     setTimeout(() => setShowSentToast(false), 2000);
   };
@@ -150,20 +165,15 @@ export function Island() {
       <div className="mx-4 mb-2 overflow-hidden rounded-full bg-white/60 border border-border px-3 py-1.5">
         <div className="flex items-center gap-2">
           <Megaphone className="h-4 w-4 flex-shrink-0 text-warning" />
-          <p className="text-xs text-muted-foreground truncate animate-pulse">
-            {allMessages[currentMsg]}
-          </p>
+          <p className="text-xs text-muted-foreground truncate animate-pulse">{allMessages[currentMsg]}</p>
         </div>
       </div>
 
       {/* Bubble Space */}
       <div
         className="relative flex-1 overflow-hidden pt-3"
-        style={{
-          background: `radial-gradient(ellipse at center, ${selectedPlanet.color}15 0%, ${selectedPlanet.color}05 50%, transparent 80%)`
-        }}
+        style={{ background: `radial-gradient(ellipse at center, ${selectedPlanet.color}15 0%, ${selectedPlanet.color}05 50%, transparent 80%)` }}
       >
-        {/* Stars background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {[...Array(30)].map((_, i) => (
             <div
@@ -184,20 +194,20 @@ export function Island() {
         {/* Bubbles */}
         {planetBubbles.map((bubble, index) => {
           if (!visibleBubbles.has(bubble.id)) return null;
-          const baseSize = bubble.type === 'talent' ? 44 : 50;
+          const style = BUBBLE_STYLE[bubble.type];
+          const stroke = STROKE_COLORS[bubble.type];
+          const baseSize = bubble.type === 'agent' ? 52 : bubble.type === 'talent' ? 44 : 50;
           const size = baseSize + bubble.matchScore * 0.4;
           const pos = BUBBLE_POSITIONS[index % BUBBLE_POSITIONS.length];
           const floatDuration = 5 + (index % 4) * 1.5;
           const isEntering = enteringId === bubble.id;
           const isTalent = bubble.type === 'talent';
 
-          // 环形进度条参数
-          const svgSize = size + 6; // SVG 比气泡大一圈
+          const svgSize = size + 6;
           const radius = size / 2 + 1;
           const circumference = 2 * Math.PI * radius;
           const progressOffset = circumference * (1 - bubble.matchScore / 100);
 
-          // 人才昵称简称：取最后1-2个字
           const shortName = isTalent
             ? (bubble.title.length >= 2 ? bubble.title.slice(-2) : bubble.title)
             : '';
@@ -207,12 +217,8 @@ export function Island() {
               key={bubble.id}
               onClick={() => setSelectedBubble(bubble)}
               className={cn(
-                'absolute rounded-full flex items-center justify-center cursor-pointer',
-                'shadow-sm',
-                'hover:scale-110 active:scale-95',
-                isTalent
-                  ? 'bg-emerald-50/90'
-                  : 'bg-amber-50/90',
+                'absolute rounded-full flex items-center justify-center cursor-pointer shadow-sm hover:scale-110 active:scale-95',
+                style.bg,
                 isEntering && 'animate-[bubble-pop_0.6s_ease-out]'
               )}
               style={{
@@ -222,64 +228,31 @@ export function Island() {
                 top: `calc(${pos.y}% - ${size / 2}px)`,
                 animation: `bubble-drift-${index % 3} ${floatDuration}s ease-in-out infinite`,
                 opacity: isEntering ? undefined : 1,
-                boxShadow: isTalent
-                  ? '0 3px 14px rgba(16,185,129,0.2)'
-                  : '0 3px 14px rgba(245,158,11,0.2)',
+                boxShadow: `0 3px 14px ${style.shadowColor}`,
               }}
             >
-              {/* 环形进度条描边 */}
               <svg
                 className="absolute inset-0 -rotate-90"
                 width={svgSize}
                 height={svgSize}
                 style={{ left: -(svgSize - size) / 2, top: -(svgSize - size) / 2 }}
               >
-                {/* 底色轨道 */}
-                <circle
-                  cx={svgSize / 2}
-                  cy={svgSize / 2}
-                  r={radius}
-                  fill="none"
-                  stroke={isTalent ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)'}
-                  strokeWidth={2.5}
-                />
-                {/* 进度弧线 */}
-                <circle
-                  cx={svgSize / 2}
-                  cy={svgSize / 2}
-                  r={radius}
-                  fill="none"
-                  stroke={isTalent ? '#10b981' : '#f59e0b'}
-                  strokeWidth={2.5}
-                  strokeLinecap="round"
-                  strokeDasharray={circumference}
-                  strokeDashoffset={progressOffset}
-                  style={{ transition: 'stroke-dashoffset 0.8s ease-out' }}
-                />
+                <circle cx={svgSize / 2} cy={svgSize / 2} r={radius} fill="none" stroke={stroke.track} strokeWidth={2.5} />
+                <circle cx={svgSize / 2} cy={svgSize / 2} r={radius} fill="none" stroke={stroke.progress} strokeWidth={2.5} strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={progressOffset} style={{ transition: 'stroke-dashoffset 0.8s ease-out' }} />
               </svg>
 
               {bubble.avatar ? (
-                <img
-                  src={bubble.avatar}
-                  alt={bubble.title}
-                  className="h-[60%] w-[60%] rounded-full object-cover ring-2 ring-white/70"
-                />
+                <img src={bubble.avatar} alt={bubble.title} className="h-[60%] w-[60%] rounded-full object-cover ring-2 ring-white/70" />
+              ) : bubble.type === 'agent' ? (
+                <Bot className="h-[45%] w-[45%] text-rose-500" />
               ) : (
-                <span className={cn(
-                  'text-[10px] text-center px-1 leading-tight font-medium',
-                  isTalent ? 'text-emerald-700' : 'text-amber-700'
-                )}>
+                <span className={cn('text-[10px] text-center px-1 leading-tight font-medium', isTalent ? 'text-emerald-700' : 'text-amber-700')}>
                   {bubble.title.length > 4 ? bubble.title.slice(0, 4) + '…' : bubble.title}
                 </span>
               )}
-              {/* 底部标签：人才显示昵称简称，任务显示"任务" */}
-              <span className={cn(
-                'absolute -bottom-1.5 left-1/2 -translate-x-1/2 rounded-full px-1.5 py-px text-[8px] whitespace-nowrap shadow-sm',
-                isTalent
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-amber-500 text-white'
-              )}>
-                {isTalent ? shortName : '任务'}
+
+              <span className={cn('absolute -bottom-1.5 left-1/2 -translate-x-1/2 rounded-full px-1.5 py-px text-[8px] whitespace-nowrap shadow-sm', style.labelBg)}>
+                {isTalent ? shortName : style.label}
               </span>
             </button>
           );
@@ -290,17 +263,13 @@ export function Island() {
           onClick={handleSmartMatch}
           className={cn(
             'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10',
-            'h-16 w-16 rounded-full',
-            'bg-primary',
-            'flex items-center justify-center shadow-lg',
-            'hover:scale-110 transition-transform',
+            'h-16 w-16 rounded-full bg-primary flex items-center justify-center shadow-lg hover:scale-110 transition-transform',
             showMatchAnim && 'animate-ping'
           )}
         >
           <Zap className="h-7 w-7 text-primary-foreground" />
         </button>
 
-        {/* Match Animation */}
         {showMatchAnim && (
           <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
             <div className="flex flex-col items-center gap-2 animate-bounce">
@@ -309,17 +278,15 @@ export function Island() {
                 <span className="text-2xl">💫</span>
                 <div className="h-14 w-14 rounded-full bg-primary/10 backdrop-blur-sm animate-pulse" />
               </div>
-              <span className="rounded-full bg-white/90 px-4 py-1.5 text-sm text-foreground shadow-md">
-                正在为你智能匹配...
-              </span>
+              <span className="rounded-full bg-white/90 px-4 py-1.5 text-sm text-foreground shadow-md">正在为你智能匹配...</span>
             </div>
           </div>
         )}
       </div>
 
-      {/* Legend + Shop Row - fixed above broadcast input bar */}
+      {/* Legend + Shop Row */}
       <div className="fixed left-0 right-0 z-31 flex items-center justify-between px-4 py-1.5 bg-white/70 backdrop-blur-sm" style={{ bottom: 'calc(4rem + 6rem)' }}>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
             <div className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
             <span className="text-[11px] text-muted-foreground">求职者</span>
@@ -328,7 +295,10 @@ export function Island() {
             <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
             <span className="text-[11px] text-muted-foreground">任务</span>
           </div>
-          <span className="text-[11px] text-muted-foreground">越大 = 越匹配</span>
+          <div className="flex items-center gap-1.5">
+            <div className="h-2.5 w-2.5 rounded-full bg-rose-400" />
+            <span className="text-[11px] text-muted-foreground">Agent</span>
+          </div>
         </div>
         <button
           onClick={() => setShowShop(true)}
@@ -339,7 +309,7 @@ export function Island() {
         </button>
       </div>
 
-      {/* World Broadcast Input Bar - fixed above bottom nav */}
+      {/* World Broadcast Input Bar */}
       <div className="fixed left-0 right-0 z-30 px-4 py-2 bg-white/70 border-t border-border" style={{ bottom: '4rem' }}>
         <div className="flex items-center gap-2">
           <Megaphone className="h-5 w-5 text-foreground flex-shrink-0" />
@@ -357,9 +327,7 @@ export function Island() {
             disabled={!broadcastText.trim()}
             className={cn(
               'flex h-9 w-9 items-center justify-center rounded-full transition-all flex-shrink-0',
-              broadcastText.trim()
-                ? 'bg-primary text-primary-foreground shadow-md hover:scale-105'
-                : 'bg-secondary text-muted-foreground/50'
+              broadcastText.trim() ? 'bg-primary text-primary-foreground shadow-md hover:scale-105' : 'bg-secondary text-muted-foreground/50'
             )}
           >
             <Send className="h-4 w-4" />
@@ -368,12 +336,10 @@ export function Island() {
         <p className="text-[10px] text-muted-foreground/50 mt-1 ml-7">全服广播 · 所有在线用户可见</p>
       </div>
 
-      {/* Sent Toast */}
       {showSentToast && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-bounce">
           <div className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-primary-foreground shadow-lg text-sm">
-            <Megaphone className="h-4 w-4" />
-            <span>世界喇叭已发出！</span>
+            <Megaphone className="h-4 w-4" /><span>世界喇叭已发出！</span>
           </div>
         </div>
       )}
@@ -382,25 +348,17 @@ export function Island() {
       {selectedBubble && (
         <div className="fixed inset-0 z-[60] flex items-end" onClick={() => setSelectedBubble(null)}>
           <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
-          <div
-            className="relative w-full rounded-t-3xl bg-white p-5 pb-6 shadow-xl"
-            onClick={e => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setSelectedBubble(null)}
-              className="absolute right-4 top-4 rounded-full bg-secondary p-1.5"
-            >
-              <X className="h-4 w-4 text-muted-foreground" />
-            </button>
-
+          <div className="relative w-full rounded-t-3xl bg-white p-5 pb-6 shadow-xl" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setSelectedBubble(null)} className="absolute right-4 top-4 rounded-full bg-secondary p-1.5"><X className="h-4 w-4 text-muted-foreground" /></button>
             <div className="flex items-center gap-3 mb-3">
               {selectedBubble.avatar ? (
                 <img src={selectedBubble.avatar} alt="" className="h-12 w-12 rounded-2xl object-cover" />
+              ) : selectedBubble.type === 'agent' ? (
+                <div className="h-12 w-12 rounded-2xl bg-rose-50 flex items-center justify-center">
+                  <Bot className="h-6 w-6 text-rose-500" />
+                </div>
               ) : (
-                <div className={cn(
-                  'h-12 w-12 rounded-2xl flex items-center justify-center',
-                  selectedBubble.type === 'task' ? 'bg-primary/10' : 'bg-success/30'
-                )}>
+                <div className={cn('h-12 w-12 rounded-2xl flex items-center justify-center', selectedBubble.type === 'task' ? 'bg-primary/10' : 'bg-success/30')}>
                   <span>{selectedBubble.type === 'task' ? '📋' : '👤'}</span>
                 </div>
               )}
@@ -409,29 +367,27 @@ export function Island() {
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className={cn(
                     'rounded-full px-2 py-0.5 text-xs',
-                    selectedBubble.type === 'talent' ? 'bg-success/20 text-success' : 'bg-primary/10 text-foreground'
+                    selectedBubble.type === 'talent' ? 'bg-success/20 text-success'
+                      : selectedBubble.type === 'agent' ? 'bg-rose-100 text-rose-600'
+                      : 'bg-primary/10 text-foreground'
                   )}>
-                    {selectedBubble.type === 'talent' ? '接任务' : '找人做'}
+                    {selectedBubble.type === 'talent' ? '接任务' : selectedBubble.type === 'agent' ? 'Agent 服务' : '找人做'}
                   </span>
                   <span className="flex items-center gap-0.5 text-xs text-success"><Sparkles className="h-3 w-3" /> 匹配 {selectedBubble.matchScore}%</span>
                 </div>
               </div>
             </div>
-
             <div className="flex gap-1.5 mb-4">
               {selectedBubble.tags.map(tag => (
-                <span key={tag} className="rounded-full bg-secondary px-2.5 py-0.5 text-xs text-foreground">
-                  {tag}
-                </span>
+                <span key={tag} className="rounded-full bg-secondary px-2.5 py-0.5 text-xs text-foreground">{tag}</span>
               ))}
             </div>
-
             <div className="flex gap-3">
               <button
                 onClick={() => {
                   setSelectedBubble(null);
-                  if (selectedBubble.type === 'task') navigate(`/task/${selectedBubble.refId}`);
-                  else navigate(`/talent/${selectedBubble.refId}`);
+                  if (selectedBubble.type === 'talent') navigate(`/talent/${selectedBubble.refId}`);
+                  else navigate(`/task/${selectedBubble.refId}`);
                 }}
                 className="flex-1 rounded-xl bg-secondary py-2.5 text-sm text-foreground hover:bg-secondary/80 transition-colors"
               >
@@ -453,19 +409,14 @@ export function Island() {
         <div className="fixed inset-0 z-[100] flex items-end justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowShop(false)} />
           <div className="relative w-full max-w-[430px] rounded-t-3xl bg-white pb-8 pt-4 animate-slide-up">
-            {/* Handle */}
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-border" />
-            {/* Header */}
             <div className="flex items-center justify-between px-5 mb-4">
               <div>
                 <h2 className="text-lg font-semibold">兴趣岛商城</h2>
                 <p className="text-xs text-muted-foreground">购买道具，提升曝光</p>
               </div>
-              <button onClick={() => setShowShop(false)} className="rounded-full p-1.5 hover:bg-secondary transition-colors">
-                <X className="h-5 w-5 text-muted-foreground" />
-              </button>
+              <button onClick={() => setShowShop(false)} className="rounded-full p-1.5 hover:bg-secondary transition-colors"><X className="h-5 w-5 text-muted-foreground" /></button>
             </div>
-            {/* Items */}
             <div className="flex flex-col gap-3 px-5">
               {SHOP_ITEMS.map(item => (
                 <div key={item.id} className="flex gap-3 rounded-2xl border border-border bg-white p-3.5">
@@ -475,27 +426,19 @@ export function Island() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-0.5">
                       <span className="text-sm font-semibold">{item.name}</span>
-                      <span className={cn('text-sm font-bold', item.colorClass.split(' ')[0])}>
-                        ¥{item.price}<span className="text-[10px] font-normal text-muted-foreground">/{item.unit}</span>
-                      </span>
+                      <span className={cn('text-sm font-bold', item.colorClass.split(' ')[0])}>¥{item.price}<span className="text-[10px] font-normal text-muted-foreground">/{item.unit}</span></span>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed mb-2">{item.description}</p>
                     <div className="flex items-center justify-between">
                       <div className="flex flex-wrap gap-1">
-                        {item.features.map((f, i) => (
-                          <span key={i} className={cn('rounded-full px-2 py-0.5 text-[10px]', item.colorClass)}>
-                            {f}
-                          </span>
-                        ))}
+                        {item.features.map((f, i) => (<span key={i} className={cn('rounded-full px-2 py-0.5 text-[10px]', item.colorClass)}>{f}</span>))}
                       </div>
                       <button
                         onClick={() => { setPurchasedItem(item.id); setTimeout(() => setPurchasedItem(null), 2000); }}
                         disabled={purchasedItem === item.id}
                         className={cn(
                           'flex-shrink-0 rounded-full px-3.5 py-1 text-xs font-medium transition-all active:scale-95',
-                          purchasedItem === item.id
-                            ? 'bg-success-light text-success'
-                            : cn('text-primary-foreground', item.colorClass.split(' ')[0].replace('text-', 'bg-'))
+                          purchasedItem === item.id ? 'bg-success-light text-success' : cn('text-primary-foreground', item.colorClass.split(' ')[0].replace('text-', 'bg-'))
                         )}
                       >
                         {purchasedItem === item.id ? '✓ 已购买' : '购买'}
@@ -509,7 +452,6 @@ export function Island() {
         </div>
       )}
 
-      {/* CSS Animations */}
       <style>{`
         @keyframes bubble-drift-0 {
           0%, 100% { transform: translate(0, 0) scale(1); }
@@ -543,9 +485,7 @@ export function Island() {
           from { transform: translateY(100%); }
           to { transform: translateY(0); }
         }
-        .animate-slide-up {
-          animation: slide-up 0.3s ease-out;
-        }
+        .animate-slide-up { animation: slide-up 0.3s ease-out; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
