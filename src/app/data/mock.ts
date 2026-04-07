@@ -48,6 +48,8 @@ export interface Milestone {
   isPaid: boolean;
 }
 
+export type DeliveryMode = 'online' | 'offline' | 'both';
+
 export interface Task {
   id: string;
   title: string;
@@ -72,6 +74,9 @@ export interface Task {
   milestones?: Milestone[];
   shifts?: { date: string; time: string; slots: number }[];
   agentCycle?: string;
+  deliveryMode?: DeliveryMode;
+  isInstant?: boolean;
+  estimatedDuration?: string;
 }
 
 export interface Talent {
@@ -281,6 +286,7 @@ export const MOCK_TASKS: Task[] = [
       { id: 'ms5', name: '三视图', percentage: 40, amount: 3200, status: 'pending', isPaid: false },
       { id: 'ms6', name: '表情包+立绘', percentage: 40, amount: 3200, status: 'pending', isPaid: false },
     ],
+    deliveryMode: 'online', isInstant: false,
   },
   {
     id: 't6', title: 'React后台管理系统开发', type: 'crowdsourcing', priceType: 'total',
@@ -288,6 +294,7 @@ export const MOCK_TASKS: Task[] = [
     budgetMin: 15000, budgetMax: 25000, tags: ['开发', 'React', '后台'], status: 'open',
     author: users[3], createdAt: '2026-03-03T16:00:00Z', applicants: 4, likes: 12, comments: 3,
     matchScore: 71, deadline: '2026-05-01', location: '深圳优先', skillRequirements: ['React', 'Node.js', 'TypeScript'],
+    deliveryMode: 'online', isInstant: false,
   },
   {
     id: 't7', title: '高级产品经理', type: 'fulltime', subType: 'regular', priceType: 'monthly',
@@ -305,20 +312,36 @@ export const MOCK_TASKS: Task[] = [
     matchScore: 80, deadline: '2026-04-30', location: '上海', skillRequirements: ['UI设计', 'Figma'],
   },
   {
-    id: 't9', title: '数据分析Agent-周期服务', type: 'agent', priceType: 'milestone',
-    description: '需要一位数据分析专家作为我们的Agent，每周提供业务数据报告、用户行为分析和增长建议。要求熟悉SQL/Python数据处理，有电商行业经验优先。',
-    budgetMin: 8000, budgetMax: 15000, tags: ['数据分析', 'Agent', 'Python'], status: 'open',
-    author: users[1], createdAt: '2026-03-05T14:00:00Z', applicants: 3, likes: 16, comments: 5,
-    matchScore: 62, deadline: '长期有效', location: '远程', skillRequirements: ['数据分析', 'SQL', 'Python'],
-    agentCycle: '每周',
+    id: 't9', title: '帮我去线下门店拍摄产品照片', type: 'agent', priceType: 'total',
+    description: 'AI 电商运营 Agent 需要人类帮忙去指定门店实拍 20 张产品图，要求白底、多角度，拍完即传。预计耗时 1-2 小时。',
+    budgetMin: 150, budgetMax: 300, tags: ['拍摄', '线下', '电商'], status: 'open',
+    author: users[1], createdAt: '2026-04-07T08:30:00Z', applicants: 4, likes: 12, comments: 2,
+    matchScore: 80, deadline: '2026-04-07', location: '上海·静安', skillRequirements: ['摄影'],
+    deliveryMode: 'offline', isInstant: true, estimatedDuration: '1-2小时',
   },
   {
-    id: 't10', title: '私域运营Agent-品牌顾问', type: 'agent', priceType: 'milestone',
-    description: '寻找一位私域运营专家，作为品牌的长期运营顾问。负责社群策略制定、内容日历规划、关键节点活动策划。每月固定交付运营报告。',
-    budgetMin: 6000, budgetMax: 12000, tags: ['运营', 'Agent', '私域'], status: 'open',
-    author: users[2], createdAt: '2026-03-04T16:30:00Z', applicants: 6, likes: 22, comments: 7,
-    matchScore: 70, deadline: '长期有效', location: '远程', skillRequirements: ['社群运营', '内容策划', '活动策划'],
-    agentCycle: '每月',
+    id: 't10', title: '验证网站注册流程并截图反馈', type: 'agent', priceType: 'total',
+    description: 'AI 测试 Agent 需要真人在不同设备/浏览器上完成注册流程，截图每一步骤并记录遇到的问题。需 Chrome + Safari 各一次。',
+    budgetMin: 50, budgetMax: 100, tags: ['测试', '网站', 'QA'], status: 'open',
+    author: users[2], createdAt: '2026-04-07T09:00:00Z', applicants: 8, likes: 18, comments: 3,
+    matchScore: 75, deadline: '2026-04-07', location: '远程', skillRequirements: ['测试'],
+    deliveryMode: 'online', isInstant: true, estimatedDuration: '30分钟',
+  },
+  {
+    id: 't11', title: '去政务大厅代办营业执照变更', type: 'agent', priceType: 'total',
+    description: 'AI 行政助理 Agent 需要人类代跑政务大厅，提交营业执照地址变更材料。材料已备齐，需拍照回传受理回执。',
+    budgetMin: 200, budgetMax: 400, tags: ['代办', '政务', '线下'], status: 'open',
+    author: users[0], createdAt: '2026-04-07T07:00:00Z', applicants: 2, likes: 8, comments: 1,
+    matchScore: 65, deadline: '2026-04-08', location: '北京·朝阳', skillRequirements: [],
+    deliveryMode: 'offline', isInstant: true, estimatedDuration: '2-3小时',
+  },
+  {
+    id: 't12', title: '电话回访 50 位客户并记录反馈', type: 'agent', priceType: 'total',
+    description: 'AI 客服 Agent 需要真人拨打电话，按话术模板回访客户满意度，每通电话约 3 分钟，实时填写在线表单。',
+    budgetMin: 300, budgetMax: 500, tags: ['电话', '客服', '回访'], status: 'open',
+    author: users[3], createdAt: '2026-04-06T16:00:00Z', applicants: 6, likes: 15, comments: 4,
+    matchScore: 70, deadline: '2026-04-08', location: '远程', skillRequirements: ['沟通'],
+    deliveryMode: 'online', isInstant: true, estimatedDuration: '3-4小时',
   },
 ];
 
@@ -366,13 +389,13 @@ export const MOCK_MESSAGES: Message[] = [
 // ─── 兴趣岛数据 ────────────────────────────────────────────
 
 export const MOCK_PLANETS: Planet[] = [
+  { id: 'p7', name: 'Agent星球', emoji: '🤖', color: '#F43F5E', memberCount: 1128 },
   { id: 'p1', name: '设计星球', emoji: '🎨', color: '#4A8C3F', memberCount: 2341 },
   { id: 'p2', name: '开发星球', emoji: '💻', color: '#1A1A2E', memberCount: 1892 },
   { id: 'p3', name: '文案星球', emoji: '✏️', color: '#6B8C5A', memberCount: 1456 },
   { id: 'p4', name: '视频星球', emoji: '🎬', color: '#7C3AED', memberCount: 987 },
   { id: 'p5', name: '游戏开发星球', emoji: '🎮', color: '#0D9488', memberCount: 654 },
   { id: 'p6', name: '音乐星球', emoji: '🎵', color: '#D97706', memberCount: 432 },
-  { id: 'p7', name: 'Agent星球', emoji: '🤖', color: '#F43F5E', memberCount: 1128 },
 ];
 
 export interface Bubble {
@@ -424,11 +447,12 @@ export const MOCK_BUBBLES: Bubble[] = [
   { id: 'b29', type: 'talent', title: '何歌手', matchScore: 55, avatar: users[2].avatar, tags: ['演唱', '录音'], refId: 'tal3', planetId: 'p6' },
   { id: 'b30', type: 'task', title: '播客片头曲', matchScore: 63, tags: ['音乐', '播客'], refId: 't1', planetId: 'p6' },
   // ── Agent星球 p7 ──
-  { id: 'b31', type: 'agent', title: '数据分析Agent', matchScore: 85, tags: ['数据', 'Agent'], refId: 't9', planetId: 'p7' },
-  { id: 'b32', type: 'agent', title: '私域运营Agent', matchScore: 78, tags: ['运营', 'Agent'], refId: 't10', planetId: 'p7' },
-  { id: 'b33', type: 'talent', title: '李明', matchScore: 72, avatar: users[1].avatar, tags: ['全栈', 'Agent'], refId: 'tal2', planetId: 'p7' },
-  { id: 'b34', type: 'agent', title: '设计顾问Agent', matchScore: 90, tags: ['设计', '顾问'], refId: 't9', planetId: 'p7' },
-  { id: 'b35', type: 'talent', title: '张艾米', matchScore: 68, avatar: users[2].avatar, tags: ['内容', 'Agent'], refId: 'tal3', planetId: 'p7' },
+  { id: 'b31', type: 'agent', title: '线下拍摄产品照片', matchScore: 80, tags: ['拍摄', '线下'], refId: 't9', planetId: 'p7' },
+  { id: 'b32', type: 'agent', title: '网站注册流程验证', matchScore: 75, tags: ['测试', '线上'], refId: 't10', planetId: 'p7' },
+  { id: 'b33', type: 'agent', title: '代办营业执照变更', matchScore: 65, tags: ['代办', '线下'], refId: 't11', planetId: 'p7' },
+  { id: 'b34', type: 'agent', title: '电话回访客户', matchScore: 70, tags: ['电话', '客服'], refId: 't12', planetId: 'p7' },
+  { id: 'b35', type: 'talent', title: '李明', matchScore: 72, avatar: users[1].avatar, tags: ['全能接单'], refId: 'tal2', planetId: 'p7' },
+  { id: 'b36', type: 'talent', title: '张艾米', matchScore: 68, avatar: users[2].avatar, tags: ['线下跑腿'], refId: 'tal3', planetId: 'p7' },
 ];
 
 // ─── 技能与分类 ────────────────────────────────────────────

@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router';
 import { MOCK_TASKS } from '../data/mock';
-import { Calendar, MapPin, Tag, Heart, Share2, ArrowLeft, Star, Clock, Users, MessageCircle, Sparkles, DollarSign, Search, CheckCircle2, Copy } from 'lucide-react';
+import { Calendar, MapPin, Tag, Heart, Share2, ArrowLeft, Star, Clock, Users, MessageCircle, Sparkles, DollarSign, Search, CheckCircle2, Copy, Zap, Wifi, Bot } from 'lucide-react';
+import { TASK_TYPE_CONFIG, getTaskTypeLabel } from '../data/mock';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { useState } from 'react';
@@ -18,6 +19,7 @@ export function TaskDetail() {
   const [commentText, setCommentText] = useState('');
   const [comments, setComments] = useState<{ text: string; time: string }[]>([]);
   const [showChatToast, setShowChatToast] = useState(false);
+  const [accepted, setAccepted] = useState(false);
 
   if (!task) {
     return (
@@ -57,6 +59,15 @@ export function TaskDetail() {
     if (!commentText.trim()) return;
     setComments(prev => [{ text: commentText.trim(), time: '刚刚' }, ...prev]);
     setCommentText('');
+  };
+
+  const isInstantType = task.type === 'crowdsourcing' || task.type === 'agent';
+  const typeConfig = TASK_TYPE_CONFIG[task.type];
+  const typeLabel = getTaskTypeLabel(task.type, task.subType);
+
+  const handleAcceptOrder = () => {
+    setAccepted(true);
+    setTimeout(() => setAccepted(false), 3000);
   };
 
   return (
@@ -101,10 +112,24 @@ export function TaskDetail() {
 
         {/* Title & Status */}
         <div className="mb-4">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <span className={cn('rounded-full px-2 py-0.5 text-xs', task.status === 'open' ? 'bg-success-light text-success' : task.status === 'in-progress' ? 'bg-info-light text-info' : 'bg-secondary text-muted-foreground')}>
               {task.status === 'open' ? '开放中' : task.status === 'in-progress' ? '进行中' : '已完成'}
             </span>
+            <span className={cn('rounded-full px-2 py-0.5 text-xs', typeConfig.badgeClass)}>{typeLabel}</span>
+            {task.isInstant && (
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-50 text-amber-600 px-2 py-0.5 text-xs font-medium">
+                <Zap className="h-3 w-3" />即时
+              </span>
+            )}
+            {isInstantType && task.deliveryMode && (
+              <span className={cn('inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium',
+                task.deliveryMode === 'offline' ? 'bg-teal-50 text-teal-600' : 'bg-blue-50 text-blue-600'
+              )}>
+                {task.deliveryMode === 'offline' ? <MapPin className="h-3 w-3" /> : <Wifi className="h-3 w-3" />}
+                {task.deliveryMode === 'offline' ? '线下' : task.deliveryMode === 'online' ? '线上' : '线上/线下'}
+              </span>
+            )}
             <span className="text-xs text-muted-foreground">发布于 {formatDistanceToNow(new Date(task.createdAt), { addSuffix: true, locale: zhCN })}</span>
           </div>
           <h2 className="text-xl text-foreground mb-2">{task.title}</h2>
@@ -126,17 +151,27 @@ export function TaskDetail() {
             <div className="flex items-center gap-2 mb-1"><DollarSign className="h-3.5 w-3.5 text-warning" /><span className="text-xs text-muted-foreground">报酬</span></div>
             <p className="text-sm text-foreground">¥{task.budgetMin.toLocaleString()}-{task.budgetMax.toLocaleString()}</p>
           </div>
-          <div className="rounded-2xl bg-white border border-border p-3">
-            <div className="flex items-center gap-2 mb-1"><Calendar className="h-3.5 w-3.5 text-info" /><span className="text-xs text-muted-foreground">截止日期</span></div>
-            <p className="text-sm text-foreground">{task.deadline}</p>
-          </div>
+          {isInstantType && task.estimatedDuration ? (
+            <div className="rounded-2xl bg-white border border-border p-3">
+              <div className="flex items-center gap-2 mb-1"><Clock className="h-3.5 w-3.5 text-amber-500" /><span className="text-xs text-muted-foreground">预计耗时</span></div>
+              <p className="text-sm text-foreground">{task.estimatedDuration}</p>
+            </div>
+          ) : (
+            <div className="rounded-2xl bg-white border border-border p-3">
+              <div className="flex items-center gap-2 mb-1"><Calendar className="h-3.5 w-3.5 text-info" /><span className="text-xs text-muted-foreground">截止日期</span></div>
+              <p className="text-sm text-foreground">{task.deadline}</p>
+            </div>
+          )}
           <div className="rounded-2xl bg-white border border-border p-3">
             <div className="flex items-center gap-2 mb-1"><MapPin className="h-3.5 w-3.5 text-muted-foreground" /><span className="text-xs text-muted-foreground">地点</span></div>
-            <p className="text-sm text-foreground">{task.location}</p>
+            <p className="text-sm text-foreground">{task.location || '远程'}</p>
           </div>
           <div className="rounded-2xl bg-white border border-border p-3">
-            <div className="flex items-center gap-2 mb-1"><Clock className="h-3.5 w-3.5 text-success" /><span className="text-xs text-muted-foreground">类型</span></div>
-            <p className="text-sm text-foreground">{task.type}</p>
+            <div className="flex items-center gap-2 mb-1">
+              {task.type === 'agent' ? <Bot className="h-3.5 w-3.5 text-rose-500" /> : <Clock className="h-3.5 w-3.5 text-success" />}
+              <span className="text-xs text-muted-foreground">类型</span>
+            </div>
+            <p className="text-sm text-foreground">{typeLabel}</p>
           </div>
         </div>
 
@@ -206,16 +241,40 @@ export function TaskDetail() {
 
       {/* Bottom Action Bar */}
       <div className="fixed bottom-16 left-0 right-0 z-40 flex gap-3 bg-white/90 backdrop-blur-md px-4 py-3 border-t border-border">
-        <button onClick={handleChat} className="flex items-center justify-center gap-1.5 flex-1 rounded-xl bg-secondary py-2.5 text-sm text-foreground hover:bg-secondary/80 transition-colors">
-          <MessageCircle className="h-4 w-4" /> 立即沟通
-        </button>
-        <button
-          onClick={() => setShowApplyModal(true)}
-          disabled={applied}
-          className={cn('flex items-center justify-center gap-1.5 flex-1 rounded-xl py-2.5 text-sm transition-colors shadow-sm', applied ? 'bg-success-light text-success' : 'bg-primary text-primary-foreground hover:bg-primary/80')}
-        >
-          {applied ? <><CheckCircle2 className="h-4 w-4" /> 已申请</> : <><Sparkles className="h-4 w-4" /> 申请任务</>}
-        </button>
+        {isInstantType ? (
+          <>
+            <div className="flex flex-col justify-center">
+              <p className="text-base font-semibold text-foreground">¥{task.budgetMin.toLocaleString()}-{task.budgetMax.toLocaleString()}</p>
+              {task.estimatedDuration && <p className="text-[10px] text-muted-foreground">{task.estimatedDuration}</p>}
+            </div>
+            <button
+              onClick={handleAcceptOrder}
+              disabled={accepted}
+              className={cn('flex items-center justify-center gap-1.5 flex-1 rounded-xl py-2.5 text-sm font-medium transition-colors shadow-sm',
+                accepted
+                  ? 'bg-success-light text-success'
+                  : task.type === 'agent'
+                    ? 'bg-rose-500 text-white hover:bg-rose-600'
+                    : 'bg-teal-500 text-white hover:bg-teal-600'
+              )}
+            >
+              {accepted ? <><CheckCircle2 className="h-4 w-4" /> 已接单</> : <><Zap className="h-4 w-4" /> 立即接单</>}
+            </button>
+          </>
+        ) : (
+          <>
+            <button onClick={handleChat} className="flex items-center justify-center gap-1.5 flex-1 rounded-xl bg-secondary py-2.5 text-sm text-foreground hover:bg-secondary/80 transition-colors">
+              <MessageCircle className="h-4 w-4" /> 立即沟通
+            </button>
+            <button
+              onClick={() => setShowApplyModal(true)}
+              disabled={applied}
+              className={cn('flex items-center justify-center gap-1.5 flex-1 rounded-xl py-2.5 text-sm transition-colors shadow-sm', applied ? 'bg-success-light text-success' : 'bg-primary text-primary-foreground hover:bg-primary/80')}
+            >
+              {applied ? <><CheckCircle2 className="h-4 w-4" /> 已申请</> : <><Sparkles className="h-4 w-4" /> 申请任务</>}
+            </button>
+          </>
+        )}
       </div>
 
       {/* Apply Modal */}

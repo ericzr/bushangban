@@ -5,6 +5,7 @@ import {
   MapPin, Star, Award, Clock, CheckCircle, ChevronRight, Settings, Edit,
   Shield, Briefcase, BookOpen, FileText, Plus, X, GraduationCap, Link2,
   Wallet, ArrowUpRight, ArrowDownLeft, Snowflake, TrendingUp, RefreshCw, Building2,
+  Users, Heart, Send, Handshake,
 } from 'lucide-react';
 import { Link } from 'react-router';
 import { formatDistanceToNow } from 'date-fns';
@@ -83,30 +84,59 @@ export function Profile() {
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats — role-aware */}
         <div className="flex justify-around mt-5 rounded-2xl bg-white p-3">
-          <div className="text-center">
-            <span className="block text-lg text-foreground">{CURRENT_USER.completedProjects}</span>
-            <span className="text-xs text-muted-foreground">完成项目</span>
-          </div>
-          <div className="h-8 w-px bg-border" />
-          <div className="text-center">
-            <span className="block text-lg text-foreground">{CURRENT_USER.fulfillmentRate}%</span>
-            <span className="text-xs text-muted-foreground">履约率</span>
-          </div>
-          <div className="h-8 w-px bg-border" />
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-0.5">
-              <span className="text-lg text-foreground">{CURRENT_USER.rating}</span>
-              <Star className="h-3.5 w-3.5 fill-warning text-warning" />
-            </div>
-            <span className="text-xs text-muted-foreground">评分</span>
-          </div>
-          <div className="h-8 w-px bg-border" />
-          <div className="text-center">
-            <span className="block text-lg text-foreground">12</span>
-            <span className="text-xs text-muted-foreground">关注者</span>
-          </div>
+          {activeRole === 'worker' ? (
+            <>
+              <div className="text-center">
+                <span className="block text-lg text-foreground">{CURRENT_USER.completedProjects}</span>
+                <span className="text-xs text-muted-foreground">完成项目</span>
+              </div>
+              <div className="h-8 w-px bg-border" />
+              <div className="text-center">
+                <span className="block text-lg text-foreground">{CURRENT_USER.fulfillmentRate}%</span>
+                <span className="text-xs text-muted-foreground">履约率</span>
+              </div>
+              <div className="h-8 w-px bg-border" />
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-0.5">
+                  <span className="text-lg text-foreground">{CURRENT_USER.rating}</span>
+                  <Star className="h-3.5 w-3.5 fill-warning text-warning" />
+                </div>
+                <span className="text-xs text-muted-foreground">评分</span>
+              </div>
+              <div className="h-8 w-px bg-border" />
+              <div className="text-center">
+                <span className="block text-lg text-foreground">12</span>
+                <span className="text-xs text-muted-foreground">关注者</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-center">
+                <span className="block text-lg text-foreground">8</span>
+                <span className="text-xs text-muted-foreground">发布任务</span>
+              </div>
+              <div className="h-8 w-px bg-border" />
+              <div className="text-center">
+                <span className="block text-lg text-foreground">3</span>
+                <span className="text-xs text-muted-foreground">进行中</span>
+              </div>
+              <div className="h-8 w-px bg-border" />
+              <div className="text-center">
+                <span className="block text-lg text-foreground">¥52k</span>
+                <span className="text-xs text-muted-foreground">累计支出</span>
+              </div>
+              <div className="h-8 w-px bg-border" />
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-0.5">
+                  <span className="text-lg text-foreground">4.9</span>
+                  <Star className="h-3.5 w-3.5 fill-warning text-warning" />
+                </div>
+                <span className="text-xs text-muted-foreground">雇主评分</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -165,17 +195,23 @@ export function Profile() {
         </div>
       </div>
 
-      {/* Bio */}
+      {/* Bio — worker shows full bio+response, employer shows a short tagline */}
       <div className="px-4 py-3">
-        <p className="text-sm text-foreground leading-relaxed">{CURRENT_USER.bio}</p>
-        <p className="text-xs text-success mt-1">
-          <Clock className="inline h-3 w-3 mr-0.5" />
-          {CURRENT_USER.responseTime}
-        </p>
+        {activeRole === 'worker' ? (
+          <>
+            <p className="text-sm text-foreground leading-relaxed">{CURRENT_USER.bio}</p>
+            <p className="text-xs text-success mt-1">
+              <Clock className="inline h-3 w-3 mr-0.5" />
+              {CURRENT_USER.responseTime}
+            </p>
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground leading-relaxed">正在寻找优秀的设计师、开发者、内容创作者加入我的项目。长期合作优先。</p>
+        )}
       </div>
 
-      {/* Skills */}
-      <div className="px-4 pb-3">
+      {/* Skills — only for worker role */}
+      {activeRole === 'worker' && <div className="px-4 pb-3">
         <h3 className="text-sm text-foreground mb-2">技能标签</h3>
         <div className="flex flex-wrap gap-1.5">
           {CURRENT_USER.skills.map(skill => (
@@ -235,29 +271,35 @@ export function Profile() {
             </div>
           </div>
         )}
-      </div>
+      </div>}
 
-      {/* Review Tags */}
-      <div className="px-4 pb-3">
-        <h3 className="text-sm text-foreground mb-2">他人评价</h3>
-        <div className="flex gap-1.5">
-          {CURRENT_USER.tags.map(tag => (
-            <span key={tag} className="rounded-full bg-success-light px-3 py-1 text-xs text-success">{tag}</span>
-          ))}
+      {/* Review Tags — only for worker */}
+      {activeRole === 'worker' && (
+        <div className="px-4 pb-3">
+          <h3 className="text-sm text-foreground mb-2">他人评价</h3>
+          <div className="flex gap-1.5">
+            {CURRENT_USER.tags.map(tag => (
+              <span key={tag} className="rounded-full bg-success-light px-3 py-1 text-xs text-success">{tag}</span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Quick Links */}
+      {/* Quick Links — role-aware */}
       <div className="px-4 pb-3">
         <div className="rounded-2xl bg-white border border-border overflow-hidden">
-          {[
-            { icon: Building2, label: '企业认证', desc: CURRENT_USER.isEnterpriseCertified ? '已认证' : '去认证，发布更多任务类型', color: 'text-info', bg: 'bg-info-light', to: '/settings' },
+          {(activeRole === 'worker' ? [
             { icon: Shield, label: '身份认证', desc: '学生/自由职业/公司', color: 'text-purple', bg: 'bg-purple-light', to: '/settings' },
-            { icon: Briefcase, label: '我发布的任务', desc: '3个进行中', color: 'text-coral', bg: 'bg-coral-light', to: '/my-tasks' },
             { icon: BookOpen, label: '我申请的任务', desc: '5个待回复', color: 'text-warning', bg: 'bg-warning-light', to: '/my-applications' },
             { icon: FileText, label: '签约管理', desc: '2份合约履行中', color: 'text-success', bg: 'bg-success-light', to: '/my-tasks' },
             { icon: Award, label: '我的成就', desc: '金牌设计师', color: 'text-coral', bg: 'bg-coral-light', to: '/profile' },
-          ].map((item, i, arr) => (
+          ] : [
+            { icon: Building2, label: '企业认证', desc: CURRENT_USER.isEnterpriseCertified ? '已认证' : '去认证，发布更多任务类型', color: 'text-info', bg: 'bg-info-light', to: '/settings' },
+            { icon: Send, label: '我发布的任务', desc: '8个任务 · 3个进行中', color: 'text-coral', bg: 'bg-coral-light', to: '/my-tasks' },
+            { icon: Handshake, label: '签约管理', desc: '2份合约履行中', color: 'text-success', bg: 'bg-success-light', to: '/my-tasks' },
+            { icon: Heart, label: '人才收藏', desc: '已收藏 15 位人才', color: 'text-rose-500', bg: 'bg-rose-50', to: '/profile' },
+            { icon: Users, label: '合作过的人才', desc: '累计合作 22 人', color: 'text-purple', bg: 'bg-purple-light', to: '/profile' },
+          ]).map((item, i, arr) => (
             <Link key={item.label} to={item.to}
               className={cn('flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-secondary/50 transition-colors', i < arr.length - 1 && 'border-b border-border')}>
               <div className={cn('rounded-xl p-2', item.bg)}><item.icon className={cn('h-4 w-4', item.color)} /></div>
@@ -271,99 +313,194 @@ export function Profile() {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Tabs — role-aware */}
       <div className="px-4 pt-2">
-        <div className="flex gap-4 border-b border-border mb-3">
-          {[
-            { key: 'projects' as const, label: '参与项目' },
-            { key: 'resume' as const, label: '简历' },
-            { key: 'reviews' as const, label: '评价' },
-          ].map(tab => (
-            <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              className={cn('pb-2 text-sm transition-colors', activeTab === tab.key ? 'text-foreground border-b-2 border-foreground' : 'text-muted-foreground')}>
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        {activeRole === 'worker' ? (
+          <>
+            <div className="flex gap-4 border-b border-border mb-3">
+              {([
+                { key: 'projects', label: '参与项目' },
+                { key: 'resume', label: '简历' },
+                { key: 'reviews', label: '评价' },
+              ] as const).map(tab => (
+                <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                  className={cn('pb-2 text-sm transition-colors', activeTab === tab.key ? 'text-foreground border-b-2 border-foreground' : 'text-muted-foreground')}>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
 
-        {activeTab === 'projects' && (
-          <div className="space-y-3">
-            {[
-              { title: '茶饮品牌VI设计', status: '进行中', rating: null, tags: ['品牌', 'UI设计'] },
-              { title: '电商App界面设计', status: '已完成', rating: 5, tags: ['UI设计', '移动端'] },
-              { title: '企业官网重设计', status: '已完成', rating: 4, tags: ['网页设计', '响应式'] },
-            ].map(project => (
-              <div key={project.title} className="rounded-2xl bg-white border border-border p-3.5">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-sm text-foreground">{project.title}</h4>
-                  <span className={cn('rounded-full px-2 py-0.5 text-[10px]', project.status === '进行中' ? 'bg-info-light text-info' : 'bg-success-light text-success')}>{project.status}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex gap-1">
-                    {project.tags.map(tag => (<span key={tag} className="text-[10px] text-muted-foreground bg-secondary rounded-full px-2 py-0.5">{tag}</span>))}
-                  </div>
-                  {project.rating && (
-                    <div className="flex items-center gap-0.5">
-                      {[...Array(5)].map((_, i) => (<Star key={i} className={cn('h-3 w-3', i < project.rating! ? 'fill-warning text-warning' : 'fill-secondary text-secondary')} />))}
+            {activeTab === 'projects' && (
+              <div className="space-y-3">
+                {[
+                  { title: '茶饮品牌VI设计', status: '进行中', rating: null, tags: ['品牌', 'UI设计'] },
+                  { title: '电商App界面设计', status: '已完成', rating: 5, tags: ['UI设计', '移动端'] },
+                  { title: '企业官网重设计', status: '已完成', rating: 4, tags: ['网页设计', '响应式'] },
+                ].map(project => (
+                  <div key={project.title} className="rounded-2xl bg-white border border-border p-3.5">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm text-foreground">{project.title}</h4>
+                      <span className={cn('rounded-full px-2 py-0.5 text-[10px]', project.status === '进行中' ? 'bg-info-light text-info' : 'bg-success-light text-success')}>{project.status}</span>
                     </div>
-                  )}
-                </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex gap-1">
+                        {project.tags.map(tag => (<span key={tag} className="text-[10px] text-muted-foreground bg-secondary rounded-full px-2 py-0.5">{tag}</span>))}
+                      </div>
+                      {project.rating && (
+                        <div className="flex items-center gap-0.5">
+                          {[...Array(5)].map((_, i) => (<Star key={i} className={cn('h-3 w-3', i < project.rating! ? 'fill-warning text-warning' : 'fill-secondary text-secondary')} />))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            )}
 
-        {activeTab === 'resume' && (
-          <div className="space-y-4">
-            <div>
-              <h4 className="flex items-center gap-1.5 text-sm text-foreground mb-2"><GraduationCap className="h-4 w-4 text-info" /> 教育背景</h4>
-              <div className="rounded-2xl bg-white border border-border p-3.5">
-                <p className="text-sm text-foreground">中国美术学院</p>
-                <p className="text-xs text-muted-foreground">视觉传达设计 · 本科 · 2017-2021</p>
-              </div>
-            </div>
-            <div>
-              <h4 className="flex items-center gap-1.5 text-sm text-foreground mb-2"><Briefcase className="h-4 w-4 text-purple" /> 工作经历</h4>
-              <div className="space-y-2">
-                <div className="rounded-2xl bg-white border border-border p-3.5">
-                  <p className="text-sm text-foreground">自由设计师</p>
-                  <p className="text-xs text-muted-foreground">2023年至今 · 自由职业</p>
-                </div>
-                <div className="rounded-2xl bg-white border border-border p-3.5">
-                  <p className="text-sm text-foreground">某互联网大厂 · UI设计师</p>
-                  <p className="text-xs text-muted-foreground">2021-2023 · 全职</p>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h4 className="flex items-center gap-1.5 text-sm text-foreground mb-2"><Link2 className="h-4 w-4 text-success" /> 作品链接</h4>
-              <div className="rounded-2xl bg-white border border-border p-3.5">
-                <a href="#" className="text-sm text-info underline">dribbble.com/chenxiaowen</a>
-                <p className="text-xs text-muted-foreground mt-1">Dribbble 作品集</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'reviews' && (
-          <div className="space-y-3">
-            {[
-              { name: '王莎莎', content: '设计能力很强，沟通效率高，按时交付，非常满意！', rating: 5, date: '2026-02-15' },
-              { name: '李明', content: '合作很愉快，设计方案很有创意，改稿也很快。', rating: 5, date: '2026-01-20' },
-              { name: '张艾米', content: '专业能力不错，就是偶尔回复稍慢一点。', rating: 4, date: '2025-12-10' },
-            ].map(review => (
-              <div key={review.name + review.date} className="rounded-2xl bg-white border border-border p-3.5">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-foreground">{review.name}</span>
-                  <div className="flex items-center gap-0.5">
-                    {[...Array(5)].map((_, i) => (<Star key={i} className={cn('h-3 w-3', i < review.rating ? 'fill-warning text-warning' : 'fill-secondary text-secondary')} />))}
+            {activeTab === 'resume' && (
+              <div className="space-y-4">
+                <div>
+                  <h4 className="flex items-center gap-1.5 text-sm text-foreground mb-2"><GraduationCap className="h-4 w-4 text-info" /> 教育背景</h4>
+                  <div className="rounded-2xl bg-white border border-border p-3.5">
+                    <p className="text-sm text-foreground">中国美术学院</p>
+                    <p className="text-xs text-muted-foreground">视觉传达设计 · 本科 · 2017-2021</p>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground">{review.content}</p>
-                <p className="text-[10px] text-muted-foreground mt-1.5">{review.date}</p>
+                <div>
+                  <h4 className="flex items-center gap-1.5 text-sm text-foreground mb-2"><Briefcase className="h-4 w-4 text-purple" /> 工作经历</h4>
+                  <div className="space-y-2">
+                    <div className="rounded-2xl bg-white border border-border p-3.5">
+                      <p className="text-sm text-foreground">自由设计师</p>
+                      <p className="text-xs text-muted-foreground">2023年至今 · 自由职业</p>
+                    </div>
+                    <div className="rounded-2xl bg-white border border-border p-3.5">
+                      <p className="text-sm text-foreground">某互联网大厂 · UI设计师</p>
+                      <p className="text-xs text-muted-foreground">2021-2023 · 全职</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="flex items-center gap-1.5 text-sm text-foreground mb-2"><Link2 className="h-4 w-4 text-success" /> 作品链接</h4>
+                  <div className="rounded-2xl bg-white border border-border p-3.5">
+                    <a href="#" className="text-sm text-info underline">dribbble.com/chenxiaowen</a>
+                    <p className="text-xs text-muted-foreground mt-1">Dribbble 作品集</p>
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
+            )}
+
+            {activeTab === 'reviews' && (
+              <div className="space-y-3">
+                {[
+                  { name: '王莎莎', content: '设计能力很强，沟通效率高，按时交付，非常满意！', rating: 5, date: '2026-02-15' },
+                  { name: '李明', content: '合作很愉快，设计方案很有创意，改稿也很快。', rating: 5, date: '2026-01-20' },
+                  { name: '张艾米', content: '专业能力不错，就是偶尔回复稍慢一点。', rating: 4, date: '2025-12-10' },
+                ].map(review => (
+                  <div key={review.name + review.date} className="rounded-2xl bg-white border border-border p-3.5">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-foreground">{review.name}</span>
+                      <div className="flex items-center gap-0.5">
+                        {[...Array(5)].map((_, i) => (<Star key={i} className={cn('h-3 w-3', i < review.rating ? 'fill-warning text-warning' : 'fill-secondary text-secondary')} />))}
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{review.content}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1.5">{review.date}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="flex gap-4 border-b border-border mb-3">
+              {([
+                { key: 'projects', label: '发布的任务' },
+                { key: 'resume', label: '合作记录' },
+                { key: 'reviews', label: '收到评价' },
+              ] as const).map(tab => (
+                <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                  className={cn('pb-2 text-sm transition-colors', activeTab === tab.key ? 'text-foreground border-b-2 border-foreground' : 'text-muted-foreground')}>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {activeTab === 'projects' && (
+              <div className="space-y-3">
+                {[
+                  { title: '品牌VI全案设计', status: '进行中', applicants: 12, budget: '¥8,000-15,000', type: '众包' },
+                  { title: '前端开发工程师（React）', status: '招聘中', applicants: 28, budget: '¥15,000-25,000/月', type: '全职' },
+                  { title: '帮我去门店拍摄产品照', status: '已完成', applicants: 6, budget: '¥150-300', type: 'Agent' },
+                  { title: '小红书代运营', status: '已完成', applicants: 8, budget: '¥3,000-6,000', type: '兼职' },
+                ].map(task => (
+                  <div key={task.title} className="rounded-2xl bg-white border border-border p-3.5">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm text-foreground">{task.title}</h4>
+                      <span className={cn('rounded-full px-2 py-0.5 text-[10px]',
+                        task.status === '进行中' ? 'bg-info-light text-info' :
+                        task.status === '招聘中' ? 'bg-amber-50 text-amber-600' :
+                        'bg-success-light text-success'
+                      )}>{task.status}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span className="bg-secondary rounded-full px-2 py-0.5 text-[10px]">{task.type}</span>
+                        <span>{task.applicants}人申请</span>
+                      </div>
+                      <span className="text-xs font-medium text-foreground">{task.budget}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'resume' && (
+              <div className="space-y-3">
+                {[
+                  { talent: '林小雨', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop', project: '二次元IP设计', status: '已完成', rating: 5 },
+                  { talent: '李明', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop', project: '小程序开发', status: '进行中', rating: null },
+                  { talent: '赵天宇', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop', project: '品牌宣传视频', status: '已完成', rating: 5 },
+                ].map(record => (
+                  <div key={record.talent + record.project} className="rounded-2xl bg-white border border-border p-3.5 flex items-center gap-3">
+                    <img src={record.avatar} alt={record.talent} className="h-10 w-10 rounded-full object-cover ring-1 ring-border" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm text-foreground">{record.talent}</h4>
+                        <span className={cn('rounded-full px-2 py-0.5 text-[10px]', record.status === '进行中' ? 'bg-info-light text-info' : 'bg-success-light text-success')}>{record.status}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{record.project}</p>
+                    </div>
+                    {record.rating && (
+                      <div className="flex items-center gap-0.5">
+                        {[...Array(5)].map((_, i) => (<Star key={i} className={cn('h-3 w-3', i < record.rating! ? 'fill-warning text-warning' : 'fill-secondary text-secondary')} />))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'reviews' && (
+              <div className="space-y-3">
+                {[
+                  { name: '林小雨', content: '老板需求清晰，付款及时，沟通也很顺畅，推荐合作！', rating: 5, date: '2026-03-01' },
+                  { name: '赵天宇', content: '很好的合作体验，需求说明详细，反馈也很快。', rating: 5, date: '2026-02-10' },
+                  { name: '张艾米', content: '合作愉快，需求稳定，准时结款。', rating: 4, date: '2026-01-15' },
+                ].map(review => (
+                  <div key={review.name + review.date} className="rounded-2xl bg-white border border-border p-3.5">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-foreground">{review.name}</span>
+                      <div className="flex items-center gap-0.5">
+                        {[...Array(5)].map((_, i) => (<Star key={i} className={cn('h-3 w-3', i < review.rating ? 'fill-warning text-warning' : 'fill-secondary text-secondary')} />))}
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{review.content}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1.5">{review.date}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

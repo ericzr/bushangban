@@ -6,11 +6,14 @@ import { cn } from '../../lib/utils';
 import { Link, useSearchParams } from 'react-router';
 
 const TYPE_ICON: Record<string, React.ElementType> = {
+  all: Target,
   fulltime: Briefcase,
   parttime: Clock,
   crowdsourcing: Target,
   agent: Bot,
 };
+
+const ALL_TYPE_TABS = [{ key: 'all' as const, label: '全部' }, ...TASK_TYPE_TABS.filter(t => t.key !== 'all')];
 
 export function Home() {
   const [activeCategory, setActiveCategory] = useState('全部');
@@ -98,37 +101,36 @@ export function Home() {
         </div>
       </div>
 
-      {/* Task Type Quick Entry */}
-      <div className="px-4 py-3">
-        <div className="flex justify-between gap-2">
-          {TASK_TYPE_TABS.filter(t => t.key !== 'all').map(tab => {
-            const Icon = TYPE_ICON[tab.key as string] || Target;
-            const config = TASK_TYPE_CONFIG[tab.key as TaskType];
+      {/* Task Type Tab Bar — acts as primary filter, visually anchored to the list */}
+      <div className="sticky z-30 bg-[var(--background)]" style={{ top: 'calc(var(--safe-top) + 3.5rem)' }}>
+        <div className="flex items-stretch px-4 pt-1">
+          {ALL_TYPE_TABS.map(tab => {
+            const Icon = TYPE_ICON[tab.key] || Target;
             const isActive = activeType === tab.key;
+            const config = tab.key !== 'all' ? TASK_TYPE_CONFIG[tab.key as TaskType] : null;
             return (
               <button
                 key={tab.key}
-                onClick={() => setActiveType(isActive ? 'all' : tab.key as TaskType)}
+                onClick={() => setActiveType(tab.key === 'all' ? 'all' : tab.key as TaskType)}
                 className={cn(
-                  'flex-1 flex flex-col items-center gap-1.5 rounded-2xl py-3 transition-all',
-                  isActive ? 'bg-foreground shadow-md' : 'bg-white border border-border'
+                  'flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm font-medium relative transition-colors',
+                  isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/70',
                 )}
               >
-                <div className={cn('rounded-xl p-2', isActive ? 'bg-white/20' : config?.bgColor)}>
-                  <Icon className={cn('h-5 w-5', isActive ? 'text-white' : config?.color)} />
-                </div>
-                <span className={cn('text-xs font-medium', isActive ? 'text-white' : 'text-foreground')}>
-                  {tab.label}
-                </span>
+                <Icon className={cn('h-4 w-4', isActive && config ? config.color : '')} />
+                <span>{tab.label}</span>
+                {isActive && (
+                  <span
+                    className={cn('absolute bottom-0 left-1/2 -translate-x-1/2 h-[3px] w-10 rounded-full', config ? config.color.replace('text-', 'bg-') : 'bg-foreground')}
+                  />
+                )}
               </button>
             );
           })}
         </div>
-      </div>
 
-      {/* Category Tabs (skill filter) */}
-      <div className="sticky z-30 bg-[var(--background)] border-b border-border" style={{ top: 'calc(var(--safe-top) + 3.5rem)' }}>
-        <div className="flex gap-2 overflow-x-auto px-4 py-2.5 scrollbar-hide">
+        {/* Category Tabs (skill filter) */}
+        <div className="flex gap-2 overflow-x-auto px-4 py-2 border-b border-border scrollbar-hide">
           {SKILL_CATEGORIES.map(cat => (
             <button
               key={cat}
@@ -146,15 +148,10 @@ export function Home() {
         </div>
       </div>
 
-      {/* Active Filter / Type Indicator */}
-      {(hasActiveFilter || activeType !== 'all') && (
+      {/* Active search-param filters (region/budget only, type tab is already visible) */}
+      {hasActiveFilter && (
         <div className="flex items-center gap-2 px-4 py-2 text-xs text-muted-foreground">
           <span>筛选中：</span>
-          {activeType !== 'all' && (
-            <button onClick={() => setActiveType('all')} className={cn('rounded-full px-2 py-0.5 flex items-center gap-1', TASK_TYPE_CONFIG[activeType].badgeClass)}>
-              {TASK_TYPE_CONFIG[activeType].label} ×
-            </button>
-          )}
           {filterRegion !== '全部' && <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5">{filterRegion}</span>}
           {filterBudget !== '全部' && <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5">{filterBudget}</span>}
           {filterType !== '全部' && <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5">{filterType}</span>}

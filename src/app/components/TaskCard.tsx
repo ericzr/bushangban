@@ -2,7 +2,7 @@ import { type Task, TASK_TYPE_CONFIG, getTaskTypeLabel } from '../data/mock';
 import { cn } from '../../lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
-import { Heart, MessageCircle, Tag, Sparkles, Bot, Clock, Briefcase, Target } from 'lucide-react';
+import { Heart, MessageCircle, Tag, Sparkles, Bot, Clock, Briefcase, Target, Zap, MapPin, Wifi } from 'lucide-react';
 import { Link } from 'react-router';
 import { useState } from 'react';
 
@@ -35,6 +35,7 @@ export function TaskCard({ task, className }: TaskCardProps) {
   const typeConfig = TASK_TYPE_CONFIG[task.type];
   const typeLabel = getTaskTypeLabel(task.type, task.subType);
   const TypeIcon = TYPE_ICON[task.type] || Tag;
+  const isInstantType = task.type === 'crowdsourcing' || task.type === 'agent';
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -81,6 +82,35 @@ export function TaskCard({ task, className }: TaskCardProps) {
           {/* Description */}
           <p className="text-xs leading-relaxed text-muted-foreground line-clamp-2">{task.description}</p>
 
+          {/* Instant / Delivery mode badges for crowdsourcing & agent */}
+          {isInstantType && (
+            <div className="flex items-center gap-2 flex-wrap">
+              {task.isInstant && (
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-50 text-amber-600 px-2 py-0.5 text-[11px] font-medium">
+                  <Zap className="h-2.5 w-2.5" />即时任务
+                </span>
+              )}
+              {task.deliveryMode && (
+                <span className={cn('inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-medium',
+                  task.deliveryMode === 'offline' ? 'bg-teal-50 text-teal-600' : 'bg-blue-50 text-blue-600'
+                )}>
+                  {task.deliveryMode === 'offline' ? <MapPin className="h-2.5 w-2.5" /> : <Wifi className="h-2.5 w-2.5" />}
+                  {task.deliveryMode === 'offline' ? '线下' : task.deliveryMode === 'online' ? '线上' : '线上/线下'}
+                </span>
+              )}
+              {task.deliveryMode === 'offline' && task.location && (
+                <span className="inline-flex items-center gap-0.5 text-[11px] text-muted-foreground">
+                  <MapPin className="h-2.5 w-2.5" />{task.location}
+                </span>
+              )}
+              {task.estimatedDuration && (
+                <span className="inline-flex items-center gap-0.5 text-[11px] text-muted-foreground">
+                  <Clock className="h-2.5 w-2.5" />{task.estimatedDuration}
+                </span>
+              )}
+            </div>
+          )}
+
           {/* Tags */}
           <div className="flex flex-wrap gap-1.5">
             {task.tags.map(tag => (
@@ -88,15 +118,10 @@ export function TaskCard({ task, className }: TaskCardProps) {
                 <Tag className="h-2.5 w-2.5" />{tag}
               </span>
             ))}
-            {task.agentCycle && (
-              <span className="inline-flex items-center gap-0.5 rounded-full bg-coral-light px-2 py-0.5 text-[11px] text-coral">
-                <Sparkles className="h-2.5 w-2.5" />{task.agentCycle}周期
-              </span>
-            )}
           </div>
 
-          {/* Milestones preview */}
-          {task.milestones && task.milestones.length > 0 && (
+          {/* Milestones preview (only for non-instant types) */}
+          {!isInstantType && task.milestones && task.milestones.length > 0 && (
             <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
               <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden flex">
                 {task.milestones.map((ms, i) => (
@@ -122,9 +147,21 @@ export function TaskCard({ task, className }: TaskCardProps) {
                 <Heart className={cn('h-3.5 w-3.5', liked && 'fill-coral')} /><span>{likeCount}</span>
               </button>
               <span className="flex items-center gap-1 text-xs"><MessageCircle className="h-3.5 w-3.5" /><span>{task.comments}</span></span>
-              <span className="text-xs">{task.applicants}人申请</span>
+              <span className="text-xs">{task.applicants}人{isInstantType ? '接单' : '申请'}</span>
             </div>
-            <PriceLabel task={task} />
+            {isInstantType ? (
+              <div className="flex items-center gap-2">
+                <PriceLabel task={task} />
+                <button
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  className={cn('rounded-full px-3 py-1 text-xs font-medium text-white', task.type === 'agent' ? 'bg-rose-500' : 'bg-teal-500')}
+                >
+                  接单
+                </button>
+              </div>
+            ) : (
+              <PriceLabel task={task} />
+            )}
           </div>
         </div>
       </div>
