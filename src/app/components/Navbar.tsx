@@ -1,4 +1,5 @@
 import logoImg from '../../assets/logo.png';
+import logoFullImg from '../../assets/logo-full.png';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { Globe, Users, Sparkles, MessageCircle, User, SlidersHorizontal, Search, X, Check } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -103,8 +104,7 @@ export function Navbar() {
         <div className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-border" style={{ paddingTop: 'var(--safe-top)' }}>
           <div className="flex items-center gap-3 px-4 py-2.5">
             <div className="flex items-center gap-1.5 flex-shrink-0">
-              <img src={logoImg} alt="不上班" className="h-7 w-auto" />
-              <span className="text-sm font-semibold text-foreground tracking-tight">不上班</span>
+              <img src={logoFullImg} alt="不上班" className="h-7 w-auto" />
             </div>
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
