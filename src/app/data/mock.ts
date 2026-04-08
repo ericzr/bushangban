@@ -357,6 +357,57 @@ export const MOCK_TASKS: Task[] = [
   },
 ];
 
+// ─── 我的接单（接单者视角进行中的任务） ──────────────────────
+
+export interface AcceptedOrder {
+  taskId: string;
+  task: Task;
+  acceptedAt: string;
+  status: 'in-progress' | 'reviewing' | 'completed';
+  currentMilestoneIdx?: number;
+  nextAction: string;
+  progress: number;           // 0-100
+}
+
+export const MY_ACCEPTED_ORDERS: AcceptedOrder[] = [
+  {
+    taskId: 't1',
+    task: MOCK_TASKS.find(t => t.id === 't1')!,
+    acceptedAt: '2026-04-02T10:00:00Z',
+    status: 'in-progress',
+    currentMilestoneIdx: 1,
+    nextAction: '提交色彩体系方案',
+    progress: 40,
+  },
+  {
+    taskId: 't9',
+    task: MOCK_TASKS.find(t => t.id === 't9')!,
+    acceptedAt: '2026-04-07T09:30:00Z',
+    status: 'in-progress',
+    currentMilestoneIdx: undefined,
+    nextAction: '前往门店拍摄产品照片',
+    progress: 20,
+  },
+  {
+    taskId: 't10',
+    task: MOCK_TASKS.find(t => t.id === 't10')!,
+    acceptedAt: '2026-04-06T14:00:00Z',
+    status: 'reviewing',
+    currentMilestoneIdx: undefined,
+    nextAction: '等待雇主验收',
+    progress: 90,
+  },
+  {
+    taskId: 't5',
+    task: MOCK_TASKS.find(t => t.id === 't5')!,
+    acceptedAt: '2026-04-01T08:00:00Z',
+    status: 'in-progress',
+    currentMilestoneIdx: 0,
+    nextAction: '提交概念草图',
+    progress: 15,
+  },
+];
+
 // ─── 评价数据 ──────────────────────────────────────────────
 
 export const MOCK_REVIEWS: Review[] = [

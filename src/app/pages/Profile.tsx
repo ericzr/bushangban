@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { CURRENT_USER, MOCK_TASKS, MOCK_WALLET, MOCK_TRANSACTIONS, type UserRole } from '../data/mock';
+import { CURRENT_USER, MOCK_TASKS, MOCK_WALLET, MOCK_TRANSACTIONS, MY_ACCEPTED_ORDERS, TASK_TYPE_CONFIG, type UserRole } from '../data/mock';
 import { cn } from '../../lib/utils';
 import {
   MapPin, Star, Award, Clock, CheckCircle, ChevronRight, Settings, Edit,
   Shield, Briefcase, BookOpen, FileText, Plus, X, GraduationCap, Link2,
   Wallet, ArrowUpRight, ArrowDownLeft, Snowflake, TrendingUp, RefreshCw, Building2,
-  Users, Heart, Send, Handshake,
+  Users, Heart, Send, Handshake, Zap, Bot, Target, AlertCircle,
 } from 'lucide-react';
 import { Link } from 'react-router';
 import { formatDistanceToNow } from 'date-fns';
@@ -281,6 +281,94 @@ export function Profile() {
             {CURRENT_USER.tags.map(tag => (
               <span key={tag} className="rounded-full bg-success-light px-3 py-1 text-xs text-success">{tag}</span>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* My Accepted Orders — worker only */}
+      {activeRole === 'worker' && MY_ACCEPTED_ORDERS.length > 0 && (
+        <div className="px-4 pb-3">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-foreground">进行中的任务</h3>
+            <span className="text-[11px] text-muted-foreground">{MY_ACCEPTED_ORDERS.filter(o => o.status !== 'completed').length} 个任务</span>
+          </div>
+          <div className="space-y-2.5">
+            {MY_ACCEPTED_ORDERS.filter(o => o.status !== 'completed').map(order => {
+              const typeConfig = TASK_TYPE_CONFIG[order.task.type];
+              const isAgent = order.task.type === 'agent';
+              const isCrowdsourcing = order.task.type === 'crowdsourcing';
+              const milestone = isCrowdsourcing && order.task.milestones && order.currentMilestoneIdx !== undefined
+                ? order.task.milestones[order.currentMilestoneIdx]
+                : null;
+              return (
+                <Link key={order.taskId} to={`/task/${order.taskId}`}>
+                  <div className="rounded-2xl bg-white border border-border p-3.5 transition-all active:scale-[0.98]">
+                    <div className="flex items-start gap-3">
+                      <div className={cn('h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0', typeConfig.bgColor)}>
+                        {isAgent ? <Bot className={cn('h-5 w-5', typeConfig.color)} /> : <Target className={cn('h-5 w-5', typeConfig.color)} />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-sm font-medium text-foreground truncate">{order.task.title}</h4>
+                          <span className={cn('rounded-full px-2 py-0.5 text-[10px] flex-shrink-0', typeConfig.badgeClass)}>
+                            {typeConfig.label}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                          <span className={cn('rounded-full px-1.5 py-0.5 text-[10px]',
+                            order.status === 'in-progress' ? 'bg-info-light text-info' : 'bg-amber-50 text-amber-600'
+                          )}>
+                            {order.status === 'in-progress' ? '进行中' : '验收中'}
+                          </span>
+                          <span>¥{order.task.budgetMin.toLocaleString()}-{order.task.budgetMax.toLocaleString()}</span>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="mt-2.5">
+                          <div className="flex items-center justify-between text-[11px] mb-1">
+                            <span className="text-muted-foreground">任务进度</span>
+                            <span className="font-medium text-foreground">{order.progress}%</span>
+                          </div>
+                          <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                            <div
+                              className={cn('h-full rounded-full transition-all',
+                                isAgent ? 'bg-rose-500' : isCrowdsourcing ? 'bg-purple-500' : 'bg-primary'
+                              )}
+                              style={{ width: `${order.progress}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Milestone info for crowdsourcing */}
+                        {milestone && (
+                          <div className="flex items-center gap-1.5 mt-2 text-[11px]">
+                            <div className="h-1.5 w-1.5 rounded-full bg-purple-400" />
+                            <span className="text-muted-foreground">当前里程碑：</span>
+                            <span className="text-foreground font-medium">{milestone.name}</span>
+                            <span className="text-muted-foreground">({milestone.percentage}% · ¥{milestone.amount.toLocaleString()})</span>
+                          </div>
+                        )}
+
+                        {/* Agent estimated duration */}
+                        {isAgent && order.task.estimatedDuration && (
+                          <div className="flex items-center gap-1.5 mt-2 text-[11px]">
+                            <Zap className="h-3 w-3 text-rose-400" />
+                            <span className="text-muted-foreground">预计耗时：</span>
+                            <span className="text-foreground font-medium">{order.task.estimatedDuration}</span>
+                          </div>
+                        )}
+
+                        {/* Next action */}
+                        <div className="flex items-center gap-1.5 mt-2 rounded-lg bg-secondary/60 px-2.5 py-1.5">
+                          <AlertCircle className="h-3 w-3 text-info flex-shrink-0" />
+                          <span className="text-[11px] text-foreground">下一步：{order.nextAction}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}

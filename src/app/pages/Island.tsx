@@ -398,7 +398,12 @@ export function Island() {
                 const isInstantType = selectedBubble.type === 'agent' || (refTask && refTask.type === 'crowdsourcing');
                 return isInstantType ? (
                   <button
-                    onClick={(e) => { e.stopPropagation(); setSelectedBubble(null); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const refId = selectedBubble.refId;
+                      setSelectedBubble(null);
+                      navigate(`/task/${refId}?accept=1`);
+                    }}
                     className={cn('flex-1 rounded-xl py-2.5 text-sm font-medium text-white transition-colors',
                       selectedBubble.type === 'agent' ? 'bg-rose-500 hover:bg-rose-600' : 'bg-teal-500 hover:bg-teal-600'
                     )}

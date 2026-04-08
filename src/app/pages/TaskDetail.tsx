@@ -1,15 +1,16 @@
-import { useParams, Link, useNavigate } from 'react-router';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router';
 import { MOCK_TASKS } from '../data/mock';
 import { Calendar, MapPin, Tag, Heart, Share2, ArrowLeft, Star, Clock, Users, MessageCircle, Sparkles, DollarSign, Search, CheckCircle2, Copy, Zap, Wifi, Bot, AlertCircle, FileText, Shield, ChevronRight, X } from 'lucide-react';
 import { TASK_TYPE_CONFIG, getTaskTypeLabel } from '../data/mock';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '../../lib/utils';
 
 export function TaskDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const task = MOCK_TASKS.find(t => t.id === id);
   const [liked, setLiked] = useState(false);
   const [followed, setFollowed] = useState(false);
@@ -22,6 +23,13 @@ export function TaskDetail() {
   const [showAcceptModal, setShowAcceptModal] = useState(false);
   const [acceptStep, setAcceptStep] = useState<'confirm' | 'success'>('confirm');
   const [accepted, setAccepted] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('accept') === '1' && task && (task.type === 'crowdsourcing' || task.type === 'agent')) {
+      setAcceptStep('confirm');
+      setShowAcceptModal(true);
+    }
+  }, [searchParams, task]);
 
   if (!task) {
     return (
