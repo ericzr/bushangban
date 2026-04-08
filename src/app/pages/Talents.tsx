@@ -2,12 +2,12 @@ import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useState } from 'react';
 import { MOCK_TALENTS } from '../data/mock';
 import { cn } from '../../lib/utils';
-import { Star, FileText, Heart, MessageCircle, Briefcase, CheckCircle2, TrendingUp, SlidersHorizontal, MapPin, X, Users, DollarSign, Zap } from 'lucide-react';
+import { CityPickerModal } from '../components/CityPickerModal';
+import { Star, FileText, Heart, MessageCircle, Briefcase, CheckCircle2, TrendingUp, SlidersHorizontal, MapPin, X, Users, DollarSign, Zap, ChevronRight } from 'lucide-react';
 
 const TALENT_TABS = ['推荐', '设计师', '开发者', '创作者', '视频', '插画'];
 
 const IDENTITY_OPTIONS = ['全部', '自由职业', '学生', '公司'];
-const CITY_OPTIONS = ['全部', '上海', '北京', '深圳', '杭州', '广州', '成都', '远程'];
 const ACCEPT_OPTIONS = ['全部', 'UI设计', '全栈开发', '文案', '视频剪辑', '插画', '品牌策划', '小程序', 'IP设计'];
 const RATE_OPTIONS = ['全部', '100以下/时', '100-300/时', '300-500/时', '500以上/时'];
 const SORT_OPTIONS = ['推荐排序', '评分最高', '项目最多', '履约率最高'];
@@ -19,6 +19,7 @@ export function Talents() {
   const [followedIds, setFollowedIds] = useState<Set<string>>(new Set());
 
   const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [showCityPicker, setShowCityPicker] = useState(false);
   const [filterIdentity, setFilterIdentity] = useState('全部');
   const [filterCity, setFilterCity] = useState('全部');
   const [filterAccept, setFilterAccept] = useState('全部');
@@ -76,7 +77,7 @@ export function Talents() {
   return (
     <div className="flex flex-col pb-4">
       {/* Tab Bar + Filter */}
-      <div className="px-4 pt-2 pb-0">
+      <div className="sticky z-20 bg-white px-4 pt-2 pb-0" style={{ top: 'calc(var(--safe-top) + 3.5rem)' }}>
         <div className="flex items-center border-b border-border">
           <div className="flex gap-0 flex-1">
             {TALENT_TABS.map(tab => (
@@ -137,14 +138,17 @@ export function Talents() {
               <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
               <span className="text-xs font-medium text-foreground">城市</span>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {CITY_OPTIONS.map(v => (
-                <button key={v} onClick={() => setFilterCity(v)} className={cn(
-                  'rounded-full px-3 py-1 text-[11px] transition-colors border',
-                  filterCity === v ? 'bg-primary/10 text-primary border-primary/30 font-medium' : 'bg-secondary/60 text-foreground border-transparent'
-                )}>{v}</button>
-              ))}
-            </div>
+            <button
+              onClick={() => setShowCityPicker(true)}
+              className={cn(
+                'flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm border w-full text-left',
+                filterCity !== '全部' ? 'bg-primary/10 text-primary border-primary/30 font-medium' : 'bg-secondary/60 text-foreground border-transparent'
+              )}
+            >
+              <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className="flex-1">{filterCity !== '全部' ? filterCity : '选择城市'}</span>
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+            </button>
           </div>
           {/* Accept Type */}
           <div>
@@ -351,6 +355,15 @@ export function Talents() {
         <FileText className="h-4 w-4" />
         <span className="text-sm">我的简历</span>
       </Link>
+
+      {/* City Picker Modal */}
+      <CityPickerModal
+        isOpen={showCityPicker}
+        onClose={() => setShowCityPicker(false)}
+        selected={filterCity}
+        onSelect={setFilterCity}
+        title="选择城市"
+      />
     </div>
   );
 }

@@ -24,7 +24,7 @@ function Layout() {
     || location.pathname.startsWith('/talent/');
 
   return (
-    <div className="min-h-screen font-sans overflow-x-hidden bg-background">
+    <div className="min-h-screen font-sans overflow-x-clip bg-background">
       <Navbar />
       <main className="pb-16" style={noTopPadding ? undefined : { paddingTop: 'calc(var(--safe-top) + 3.5rem)' }}>
         <Outlet />

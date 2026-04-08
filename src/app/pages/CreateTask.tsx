@@ -8,7 +8,7 @@ import {
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { cn } from '../../lib/utils';
-import { TASK_TYPE_CONFIG, type TaskType, type TaskSubType } from '../data/mock';
+import { TASK_TYPE_CONFIG, type TaskType } from '../data/mock';
 
 const TASK_CATEGORIES = [
   { value: 'design', label: '设计', Icon: Palette },
@@ -34,10 +34,10 @@ const URGENCY_LEVELS = [
 ];
 
 const TASK_TYPE_OPTIONS: { key: TaskType; label: string; desc: string; Icon: React.ElementType }[] = [
-  { key: 'fulltime',      label: '全职',   desc: '长期固定岗位/实习',          Icon: Briefcase },
-  { key: 'parttime',      label: '兼职',   desc: '灵活时间，按时计费',          Icon: Clock },
-  { key: 'crowdsourcing', label: '众包',   desc: '按成果付费，支持里程碑',      Icon: Target },
-  { key: 'agent',         label: 'Agent', desc: '雇佣人类，周期持续服务',       Icon: Bot },
+  { key: 'intern',        label: '实习',    desc: '实习岗位，培养新人',           Icon: GraduationCap },
+  { key: 'parttime',      label: '兼职',    desc: '灵活时间，按时计费',           Icon: Clock },
+  { key: 'crowdsourcing', label: '众包任务', desc: '按成果付费，支持里程碑',       Icon: Target },
+  { key: 'agent',         label: 'Agent任务', desc: '自动化Agent，周期持续服务', Icon: Bot },
 ];
 
 const AGENT_CYCLES = ['每周', '每两周', '每月', '每季度'];
@@ -58,7 +58,6 @@ export function CreateTask() {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const [taskType, setTaskType] = useState<TaskType>('crowdsourcing');
-  const [subType, setSubType] = useState<TaskSubType>('regular');
   const [milestones, setMilestones] = useState<{ name: string; pct: number }[]>([{ name: '', pct: 100 }]);
   const [agentCycle, setAgentCycle] = useState('每月');
 
@@ -73,7 +72,7 @@ export function CreateTask() {
   const removeTag = (tag: string) => setTags(tags.filter(t => t !== tag));
 
   const onSubmit = (data: any) => {
-    console.log({ ...data, tags, workMode, urgency, headcount, selectedCategory, taskType, subType, milestones, agentCycle });
+    console.log({ ...data, tags, workMode, urgency, headcount, selectedCategory, taskType, milestones, agentCycle });
     setShowSuccess(true);
     setTimeout(() => { setShowSuccess(false); navigate('/'); }, 2000);
   };
@@ -83,7 +82,7 @@ export function CreateTask() {
   const progress = (step / totalSteps) * 100;
 
   const pricePlaceholder = () => {
-    if (taskType === 'fulltime') return { min: '8000', max: '15000', unit: '/月' };
+    if (taskType === 'intern') return { min: '3000', max: '6000', unit: '/月' };
     if (taskType === 'parttime') return { min: '100', max: '300', unit: '/时' };
     if (taskType === 'agent') return { min: '5000', max: '15000', unit: '/周期' };
     return { min: '1000', max: '5000', unit: '' };
@@ -138,31 +137,14 @@ export function CreateTask() {
               </div>
             </div>
 
-            {/* SubType for fulltime */}
-            {taskType === 'fulltime' && (
-              <div>
-                <label className="text-sm text-foreground mb-2 block">岗位性质</label>
-                <div className="flex gap-2">
-                  {([['regular', '正式全职', Briefcase], ['intern', '实习岗位', GraduationCap]] as [TaskSubType, string, React.ElementType][]).map(([key, label, Icon]) => (
-                    <button key={key} type="button" onClick={() => setSubType(key)}
-                      className={cn('flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm transition-all border',
-                        subType === key ? 'bg-primary/5 border-primary text-foreground' : 'bg-white/60 border-border text-muted-foreground'
-                      )}>
-                      <Icon className="h-4 w-4" />{label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Title */}
             <div>
               <label className="text-sm text-foreground mb-1.5 flex items-center gap-1">
                 <Briefcase className="h-3.5 w-3.5 text-foreground" />
-                {taskType === 'fulltime' ? '职位名称' : taskType === 'agent' ? 'Agent 服务名称' : '任务标题'} <span className="text-coral">*</span>
+                {taskType === 'intern' ? '实习岗位名称' : taskType === 'agent' ? 'Agent 服务名称' : '任务标题'} <span className="text-coral">*</span>
               </label>
               <input {...register('title', { required: true })}
-                placeholder={taskType === 'fulltime' ? '例如：高级UI设计师' : taskType === 'agent' ? '例如：数据分析Agent-周期服务' : '例如：为我的品牌设计一套VI系统'}
+                placeholder={taskType === 'intern' ? '例如：UI设计实习生' : taskType === 'agent' ? '例如：数据分析Agent-周期服务' : '例如：为我的品牌设计一套VI系统'}
                 maxLength={50}
                 className="w-full rounded-2xl border border-border bg-secondary/30 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
               />
@@ -226,7 +208,7 @@ export function CreateTask() {
             <div>
               <label className="text-sm text-foreground mb-1.5 flex items-center gap-1">
                 <DollarSign className="h-3.5 w-3.5 text-foreground" />
-                {taskType === 'fulltime' ? '薪资范围 (¥/月)' : taskType === 'parttime' ? '时薪范围 (¥/时)' : taskType === 'agent' ? '服务费范围 (¥/周期)' : '预算范围 (¥)'}
+                {taskType === 'intern' ? '实习薪资 (¥/月)' : taskType === 'parttime' ? '时薪范围 (¥/时)' : taskType === 'agent' ? '服务费范围 (¥/周期)' : '预算范围 (¥)'}
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <input type="number" {...register('budgetMin')} placeholder={pp.min}

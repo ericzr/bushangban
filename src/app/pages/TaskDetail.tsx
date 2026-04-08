@@ -73,9 +73,10 @@ export function TaskDetail() {
 
   const isAgentType = task.type === 'agent';
   const isCrowdsourcing = task.type === 'crowdsourcing';
+  const isIntern = task.type === 'intern';
   const isInstantType = isAgentType || (isCrowdsourcing && task.isInstant);
   const typeConfig = TASK_TYPE_CONFIG[task.type];
-  const typeLabel = getTaskTypeLabel(task.type, task.subType);
+  const typeLabel = getTaskTypeLabel(task.type);
 
   const handleAcceptOrder = () => {
     setShowAcceptModal(true);
@@ -314,6 +315,23 @@ export function TaskDetail() {
               )}
             >
               {accepted ? <><CheckCircle2 className="h-4 w-4" /> 已接单</> : <><Zap className="h-4 w-4" /> 立即接单</>}
+            </button>
+          </>
+        ) : isIntern ? (
+          <>
+            <div className="flex flex-col justify-center">
+              <p className="text-base font-semibold text-foreground">¥{task.budgetMin.toLocaleString()}-{task.budgetMax.toLocaleString()}</p>
+              <p className="text-[10px] text-muted-foreground">/月 · 实习岗位</p>
+            </div>
+            <button onClick={handleChat} className="flex items-center justify-center gap-1.5 flex-1 rounded-xl bg-secondary py-2.5 text-sm text-foreground hover:bg-secondary/80 transition-colors">
+              <MessageCircle className="h-4 w-4" /> 咨询详情
+            </button>
+            <button
+              onClick={() => setShowApplyModal(true)}
+              disabled={applied}
+              className={cn('flex items-center justify-center gap-1.5 flex-1 rounded-xl py-2.5 text-sm transition-colors shadow-sm', applied ? 'bg-success-light text-success' : 'bg-blue-500 text-white hover:bg-blue-600')}
+            >
+              {applied ? <><CheckCircle2 className="h-4 w-4" /> 已申请</> : <><Sparkles className="h-4 w-4" /> 申请实习</>}
             </button>
           </>
         ) : (

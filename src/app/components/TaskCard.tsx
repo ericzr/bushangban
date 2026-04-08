@@ -2,7 +2,7 @@ import { type Task, TASK_TYPE_CONFIG, getTaskTypeLabel } from '../data/mock';
 import { cn } from '../../lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
-import { Heart, MessageCircle, Tag, Sparkles, Bot, Clock, Briefcase, Target, Zap, MapPin, Wifi } from 'lucide-react';
+import { Heart, MessageCircle, Tag, Bot, Clock, GraduationCap, Target, Zap, MapPin, Wifi } from 'lucide-react';
 import { Link } from 'react-router';
 import { useState } from 'react';
 
@@ -12,7 +12,7 @@ interface TaskCardProps {
 }
 
 const TYPE_ICON: Record<string, React.ElementType> = {
-  fulltime: Briefcase,
+  intern: GraduationCap,
   parttime: Clock,
   crowdsourcing: Target,
   agent: Bot,
@@ -33,10 +33,11 @@ export function TaskCard({ task, className }: TaskCardProps) {
   const [likeCount, setLikeCount] = useState(task.likes);
 
   const typeConfig = TASK_TYPE_CONFIG[task.type];
-  const typeLabel = getTaskTypeLabel(task.type, task.subType);
+  const typeLabel = getTaskTypeLabel(task.type);
   const TypeIcon = TYPE_ICON[task.type] || Tag;
   const isAgentType = task.type === 'agent';
   const isCrowdsourcing = task.type === 'crowdsourcing';
+  const isIntern = task.type === 'intern';
   const isInstantType = isAgentType || (isCrowdsourcing && task.isInstant);
 
   const handleLike = (e: React.MouseEvent) => {
@@ -159,6 +160,16 @@ export function TaskCard({ task, className }: TaskCardProps) {
                   className={cn('rounded-full px-3 py-1 text-xs font-medium text-white', isAgentType ? 'bg-rose-500' : 'bg-teal-500')}
                 >
                   接单
+                </button>
+              </div>
+            ) : isIntern ? (
+              <div className="flex items-center gap-2">
+                <PriceLabel task={task} />
+                <button
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  className="rounded-full px-3 py-1 text-xs font-medium text-white bg-blue-500"
+                >
+                  申请
                 </button>
               </div>
             ) : (

@@ -19,11 +19,11 @@ function SplashScreen({ onDone }: { onDone: () => void }) {
     >
       <img
         src={logoImg}
-        alt="不上班"
-        className="h-16 w-auto animate-[splash-bounce_1s_ease-in-out]"
+        alt="职游者"
+        className="h-24 w-auto animate-[splash-bounce_1s_ease-in-out]"
       />
       <p className="mt-3 text-sm text-muted-foreground animate-[splash-fade_0.8s_ease-in_0.3s_both]">
-        自由工作，快乐生活
+        不做全职，只做自己
       </p>
     </div>
   );

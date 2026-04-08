@@ -1,7 +1,6 @@
 // ─── 基础类型 ────────────────────────────────────────────
 
-export type TaskType = 'fulltime' | 'parttime' | 'crowdsourcing' | 'agent';
-export type TaskSubType = 'regular' | 'intern';
+export type TaskType = 'intern' | 'parttime' | 'crowdsourcing' | 'agent';
 export type PriceType = 'monthly' | 'hourly' | 'total' | 'milestone' | 'negotiable';
 export type TaskStatus = 'open' | 'matched' | 'in-progress' | 'reviewing' | 'completed' | 'settled';
 export type UserRole = 'employer' | 'worker';
@@ -59,7 +58,6 @@ export interface Task {
   tags: string[];
   status: TaskStatus;
   type: TaskType;
-  subType?: TaskSubType;
   priceType: PriceType;
   author: User;
   createdAt: string;
@@ -144,22 +142,21 @@ export const TASK_TYPE_CONFIG: Record<TaskType, {
   barColor: string;
   badgeClass: string;
 }> = {
-  fulltime:      { label: '全职', color: 'text-info', bgColor: 'bg-info-light', barColor: 'bg-blue-500', badgeClass: 'bg-blue-50 text-blue-600' },
+  intern:        { label: '实习', color: 'text-info', bgColor: 'bg-info-light', barColor: 'bg-blue-500', badgeClass: 'bg-blue-50 text-blue-600' },
   parttime:      { label: '兼职', color: 'text-warning', bgColor: 'bg-warning-light', barColor: 'bg-amber-500', badgeClass: 'bg-amber-50 text-amber-600' },
-  crowdsourcing: { label: '众包', color: 'text-purple', bgColor: 'bg-purple-light', barColor: 'bg-purple-500', badgeClass: 'bg-purple-50 text-purple-600' },
-  agent:         { label: 'Agent', color: 'text-coral', bgColor: 'bg-coral-light', barColor: 'bg-rose-500', badgeClass: 'bg-rose-50 text-rose-600' },
+  crowdsourcing: { label: '众包任务', color: 'text-purple', bgColor: 'bg-purple-light', barColor: 'bg-purple-500', badgeClass: 'bg-purple-50 text-purple-600' },
+  agent:         { label: 'Agent任务', color: 'text-coral', bgColor: 'bg-coral-light', barColor: 'bg-rose-500', badgeClass: 'bg-rose-50 text-rose-600' },
 };
 
 export const TASK_TYPE_TABS: { key: TaskType | 'all'; label: string }[] = [
   { key: 'all', label: '全部' },
-  { key: 'fulltime', label: '全职' },
+  { key: 'intern', label: '实习' },
   { key: 'parttime', label: '兼职' },
-  { key: 'crowdsourcing', label: '众包' },
-  { key: 'agent', label: 'Agent' },
+  { key: 'crowdsourcing', label: '众包任务' },
+  { key: 'agent', label: 'Agent任务' },
 ];
 
-export function getTaskTypeLabel(type: TaskType, subType?: TaskSubType): string {
-  if (type === 'fulltime' && subType === 'intern') return '实习';
+export function getTaskTypeLabel(type: TaskType): string {
   return TASK_TYPE_CONFIG[type].label;
 }
 
@@ -309,15 +306,15 @@ export const MOCK_TASKS: Task[] = [
     deliveryMode: 'online', isInstant: false,
   },
   {
-    id: 't7', title: '高级产品经理', type: 'fulltime', subType: 'regular', priceType: 'monthly',
-    description: '寻找一位有3年以上B端产品经验的产品经理，负责SaaS平台核心模块的规划与落地。需具备数据分析能力和良好的跨部门沟通能力。',
-    budgetMin: 25000, budgetMax: 40000, tags: ['产品经理', 'B端', 'SaaS'], status: 'open',
-    author: users[0], createdAt: '2026-03-05T09:00:00Z', applicants: 8, likes: 20, comments: 6,
-    matchScore: 55, deadline: '长期有效', location: '上海', skillRequirements: ['产品设计', '数据分析', '项目管理'],
+    id: 't7', title: '产品运营实习生', type: 'intern', priceType: 'monthly',
+    description: '互联网公司招收产品运营实习生1名，负责用户增长、内容运营及数据分析工作。需在校生或应届生，每周出勤4天，有独立思考能力和对互联网产品的热情。',
+    budgetMin: 4000, budgetMax: 6000, tags: ['产品运营', '数据分析', '内容运营'], status: 'open',
+    author: users[0], createdAt: '2026-03-05T09:00:00Z', applicants: 12, likes: 26, comments: 7,
+    matchScore: 68, deadline: '2026-05-15', location: '上海', skillRequirements: ['产品思维', '数据分析', '写作'],
     isUrgent: true,
   },
   {
-    id: 't8', title: 'UI设计实习生', type: 'fulltime', subType: 'intern', priceType: 'monthly',
+    id: 't8', title: 'UI设计实习生', type: 'intern', priceType: 'monthly',
     description: '设计团队招收UI设计实习生1名，需在校生，每周至少出勤4天，有Figma基础优先。实习期3-6个月，表现优秀可转正。',
     budgetMin: 3000, budgetMax: 5000, tags: ['UI设计', '实习', 'Figma'], status: 'open',
     author: users[0], createdAt: '2026-03-06T10:00:00Z', applicants: 15, likes: 38, comments: 9,
