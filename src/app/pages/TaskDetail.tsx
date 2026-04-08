@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router';
 import { MOCK_TASKS } from '../data/mock';
-import { Calendar, MapPin, Tag, Heart, Share2, ArrowLeft, Star, Clock, Users, MessageCircle, Sparkles, DollarSign, Search, CheckCircle2, Copy, Zap, Wifi, Bot } from 'lucide-react';
+import { Calendar, MapPin, Tag, Heart, Share2, ArrowLeft, Star, Clock, Users, MessageCircle, Sparkles, DollarSign, Search, CheckCircle2, Copy, Zap, Wifi, Bot, AlertCircle, FileText, Shield, ChevronRight, X } from 'lucide-react';
 import { TASK_TYPE_CONFIG, getTaskTypeLabel } from '../data/mock';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
@@ -19,6 +19,8 @@ export function TaskDetail() {
   const [commentText, setCommentText] = useState('');
   const [comments, setComments] = useState<{ text: string; time: string }[]>([]);
   const [showChatToast, setShowChatToast] = useState(false);
+  const [showAcceptModal, setShowAcceptModal] = useState(false);
+  const [acceptStep, setAcceptStep] = useState<'confirm' | 'success'>('confirm');
   const [accepted, setAccepted] = useState(false);
 
   if (!task) {
@@ -68,8 +70,13 @@ export function TaskDetail() {
   const typeLabel = getTaskTypeLabel(task.type, task.subType);
 
   const handleAcceptOrder = () => {
+    setShowAcceptModal(true);
+    setAcceptStep('confirm');
+  };
+
+  const confirmAcceptOrder = () => {
+    setAcceptStep('success');
     setAccepted(true);
-    setTimeout(() => setAccepted(false), 3000);
   };
 
   return (
@@ -356,6 +363,176 @@ export function TaskDetail() {
       {showChatToast && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 rounded-full bg-primary px-4 py-2 text-sm text-primary-foreground shadow-lg">
           正在跳转到消息...
+        </div>
+      )}
+
+      {/* Accept Order Modal */}
+      {showAcceptModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 backdrop-blur-sm" onClick={() => { if (acceptStep === 'success') { setShowAcceptModal(false); } }}>
+          <div className="w-full max-w-lg rounded-t-3xl bg-white shadow-xl animate-slide-up" onClick={e => e.stopPropagation()}>
+            <div className="mx-auto mt-3 mb-2 h-1 w-10 rounded-full bg-border" />
+
+            {acceptStep === 'confirm' ? (
+              <div className="px-5 pb-6">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base font-semibold text-foreground">确认接单</h3>
+                  <button onClick={() => setShowAcceptModal(false)} className="rounded-full p-1 hover:bg-secondary"><X className="h-4 w-4 text-muted-foreground" /></button>
+                </div>
+
+                {/* Task summary */}
+                <div className={cn('rounded-2xl p-3.5 mb-4', isAgentType ? 'bg-rose-50' : 'bg-teal-50')}>
+                  <div className="flex items-start gap-3">
+                    <div className={cn('flex items-center justify-center h-10 w-10 rounded-xl flex-shrink-0', isAgentType ? 'bg-rose-100' : 'bg-teal-100')}>
+                      {isAgentType ? <Bot className="h-5 w-5 text-rose-500" /> : <FileText className="h-5 w-5 text-teal-600" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{task.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{task.author.name} · {typeLabel}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Key info grid */}
+                <div className="grid grid-cols-2 gap-2.5 mb-4">
+                  <div className="rounded-xl bg-secondary/60 p-3">
+                    <p className="text-[11px] text-muted-foreground mb-0.5">报酬</p>
+                    <p className="text-sm font-semibold text-foreground">¥{task.budgetMin.toLocaleString()}-{task.budgetMax.toLocaleString()}</p>
+                  </div>
+                  {isAgentType && task.estimatedDuration ? (
+                    <div className="rounded-xl bg-secondary/60 p-3">
+                      <p className="text-[11px] text-muted-foreground mb-0.5">预计耗时</p>
+                      <p className="text-sm font-semibold text-foreground">{task.estimatedDuration}</p>
+                    </div>
+                  ) : (
+                    <div className="rounded-xl bg-secondary/60 p-3">
+                      <p className="text-[11px] text-muted-foreground mb-0.5">截止日期</p>
+                      <p className="text-sm font-semibold text-foreground">{task.deadline}</p>
+                    </div>
+                  )}
+                  {(isAgentType || isCrowdsourcing) && task.deliveryMode && (
+                    <div className="rounded-xl bg-secondary/60 p-3">
+                      <p className="text-[11px] text-muted-foreground mb-0.5">交付方式</p>
+                      <p className="text-sm font-semibold text-foreground">
+                        {task.deliveryMode === 'offline' ? '线下' : task.deliveryMode === 'online' ? '线上' : '线上/线下'}
+                      </p>
+                    </div>
+                  )}
+                  <div className="rounded-xl bg-secondary/60 p-3">
+                    <p className="text-[11px] text-muted-foreground mb-0.5">地点</p>
+                    <p className="text-sm font-semibold text-foreground">{task.location || '远程'}</p>
+                  </div>
+                </div>
+
+                {/* Milestones for crowdsourcing */}
+                {isCrowdsourcing && task.milestones && task.milestones.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-foreground mb-2">交付与打款节奏</p>
+                    <div className="rounded-xl border border-border overflow-hidden">
+                      {task.milestones.map((ms, i) => (
+                        <div key={ms.id} className={cn('flex items-center gap-2.5 px-3 py-2', i > 0 && 'border-t border-border')}>
+                          <div className="flex items-center justify-center h-5 w-5 rounded-full bg-teal-100 text-[10px] font-semibold text-teal-700 flex-shrink-0">
+                            {i + 1}
+                          </div>
+                          <p className="flex-1 text-xs text-foreground truncate">{ms.name}</p>
+                          <p className="text-xs font-medium text-foreground flex-shrink-0">¥{ms.amount.toLocaleString()}</p>
+                          <span className="text-[10px] text-muted-foreground flex-shrink-0">{ms.percentage}%</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-1.5">每阶段验收通过后平台自动打款</p>
+                  </div>
+                )}
+
+                {/* Agent instant task notice */}
+                {isAgentType && (
+                  <div className="flex items-start gap-2.5 rounded-xl bg-amber-50 p-3 mb-4">
+                    <AlertCircle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-medium text-amber-700">即时任务须知</p>
+                      <p className="text-[11px] text-amber-600 mt-0.5">接单后需在约定时间内完成，完成后上传凭证即可获得报酬。超时未完成可能影响信用评分。</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Platform guarantee */}
+                <div className="flex items-center gap-2 rounded-xl bg-secondary/40 px-3 py-2.5 mb-5">
+                  <Shield className="h-4 w-4 text-success flex-shrink-0" />
+                  <p className="text-[11px] text-muted-foreground">平台担保交易，资金由平台托管，验收通过后打款</p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-3">
+                  <button onClick={() => setShowAcceptModal(false)} className="flex-1 rounded-xl bg-secondary py-2.5 text-sm text-foreground">
+                    再想想
+                  </button>
+                  <button
+                    onClick={confirmAcceptOrder}
+                    className={cn('flex items-center justify-center gap-1.5 flex-1 rounded-xl py-2.5 text-sm font-medium text-white',
+                      isAgentType ? 'bg-rose-500 hover:bg-rose-600' : 'bg-teal-500 hover:bg-teal-600'
+                    )}
+                  >
+                    <Zap className="h-4 w-4" /> 确认接单
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Success state */
+              <div className="px-5 pb-8 text-center">
+                <div className={cn('mx-auto mt-2 mb-4 flex items-center justify-center h-16 w-16 rounded-full', isAgentType ? 'bg-rose-50' : 'bg-teal-50')}>
+                  <CheckCircle2 className={cn('h-8 w-8', isAgentType ? 'text-rose-500' : 'text-teal-500')} />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-1">接单成功！</h3>
+                <p className="text-sm text-muted-foreground mb-5">
+                  {isAgentType
+                    ? '请在约定时间内完成任务，完成后上传凭证'
+                    : '雇主将很快与你确认详情，请留意消息通知'
+                  }
+                </p>
+
+                {/* Next steps */}
+                <div className="rounded-2xl border border-border overflow-hidden text-left mb-5">
+                  {(isAgentType ? [
+                    { icon: MessageCircle, label: '联系雇主确认细节', desc: '沟通具体要求和注意事项' },
+                    { icon: MapPin, label: task.deliveryMode === 'offline' ? '前往指定地点' : '在线完成任务', desc: task.deliveryMode === 'offline' ? task.location || '查看任务详情中的地址' : '按要求完成并提交成果' },
+                    { icon: FileText, label: '上传完成凭证', desc: '拍照或截图上传，等待验收' },
+                  ] : [
+                    { icon: MessageCircle, label: '与雇主沟通需求细节', desc: '确认第一个里程碑的具体要求' },
+                    { icon: FileText, label: '按里程碑分阶段交付', desc: `共${task.milestones?.length || 0}个里程碑，逐步完成` },
+                    { icon: DollarSign, label: '验收通过自动打款', desc: '每阶段验收后资金自动到账' },
+                  ]).map((step, i) => (
+                    <div key={i} className={cn('flex items-center gap-3 px-4 py-3', i > 0 && 'border-t border-border')}>
+                      <div className={cn('flex items-center justify-center h-8 w-8 rounded-full flex-shrink-0', isAgentType ? 'bg-rose-50' : 'bg-teal-50')}>
+                        <step.icon className={cn('h-4 w-4', isAgentType ? 'text-rose-500' : 'text-teal-500')} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-foreground">{step.label}</p>
+                        <p className="text-[11px] text-muted-foreground">{step.desc}</p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => { setShowAcceptModal(false); navigate('/messages'); }}
+                    className={cn('flex items-center justify-center gap-1.5 flex-1 rounded-xl py-2.5 text-sm font-medium text-white',
+                      isAgentType ? 'bg-rose-500' : 'bg-teal-500'
+                    )}
+                  >
+                    <MessageCircle className="h-4 w-4" /> 联系雇主
+                  </button>
+                  <button
+                    onClick={() => setShowAcceptModal(false)}
+                    className="flex-1 rounded-xl bg-secondary py-2.5 text-sm text-foreground"
+                  >
+                    返回详情
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
