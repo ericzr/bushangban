@@ -23,7 +23,7 @@ function PriceLabel({ task }: { task: Task }) {
     return <span className="text-sm font-semibold text-foreground">¥{task.budgetMin.toLocaleString()}-{task.budgetMax.toLocaleString()}<span className="text-xs font-normal text-muted-foreground">/月</span></span>;
   }
   if (task.priceType === 'hourly') {
-    return <span className="text-sm font-semibold text-foreground">¥{task.budgetMin}-{task.budgetMax}<span className="text-xs font-normal text-muted-foreground">/篇</span></span>;
+    return <span className="text-sm font-semibold text-foreground">¥{task.budgetMin}-{task.budgetMax}<span className="text-xs font-normal text-muted-foreground">/小时</span></span>;
   }
   return <span className="text-sm font-semibold text-foreground">¥{task.budgetMin.toLocaleString()}-{task.budgetMax.toLocaleString()}</span>;
 }

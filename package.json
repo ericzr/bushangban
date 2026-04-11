@@ -1,5 +1,6 @@
 {
-  "name": "@figma/my-make-file",
+  "name": "bushangban",
+  "description": "职游者移动端协作平台原型",
   "private": true,
   "version": "0.0.1",
   "type": "module",

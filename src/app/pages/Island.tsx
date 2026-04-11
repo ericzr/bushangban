@@ -506,8 +506,6 @@ export function Island() {
           to { transform: translateY(0); }
         }
         .animate-slide-up { animation: slide-up 0.3s ease-out; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
   );

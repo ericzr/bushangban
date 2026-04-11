@@ -29,6 +29,17 @@ function SplashScreen({ onDone }: { onDone: () => void }) {
   );
 }
 
+function RouteLoadingFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
+      <div>
+        <img src={logoImg} alt="职游者" className="mx-auto h-10 w-auto opacity-80" />
+        <p className="mt-3 text-sm text-muted-foreground">页面加载中...</p>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [showSplash, setShowSplash] = useState(true);
 
@@ -36,7 +47,7 @@ function App() {
     <>
       <Toaster position="top-right" richColors />
       {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
-      <RouterProvider router={router} />
+      <RouterProvider router={router} fallbackElement={<RouteLoadingFallback />} />
     </>
   );
 }
