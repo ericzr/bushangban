@@ -23,7 +23,7 @@ function SplashScreen({ onDone }: { onDone: () => void }) {
         className="h-24 w-auto animate-[splash-bounce_1s_ease-in-out]"
       />
       <p className="mt-3 text-sm text-muted-foreground animate-[splash-fade_0.8s_ease-in_0.3s_both]">
-        不做全职，只做自己
+        同行共奔赴、立身且自由
       </p>
     </div>
   );
