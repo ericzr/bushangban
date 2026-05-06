@@ -17,7 +17,7 @@ const MAIN_TABS: { key: MainTabKey; label: string; icon: React.ElementType }[] =
 const SUB_TABS: { key: SubTabKey; label: string; icon: React.ElementType; activeClass: string; barClass: string }[] = [
   { key: 'long', label: '长期', icon: Clock, activeClass: 'text-amber-600', barClass: 'bg-amber-500' },
   { key: 'short', label: '短期', icon: Package, activeClass: 'text-purple-600', barClass: 'bg-purple-500' },
-  { key: 'instant', label: '即时性独立任务', icon: Zap, activeClass: 'text-rose-600', barClass: 'bg-rose-500' },
+  { key: 'instant', label: '任务', icon: Zap, activeClass: 'text-rose-600', barClass: 'bg-rose-500' },
 ];
 
 const BUDGET_OPTIONS = ['全部', '1k以下', '1k-5k', '5k-1w', '1w-5w', '5w以上'];

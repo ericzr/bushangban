@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { MOCK_PLANETS, MOCK_BUBBLES, WORLD_MESSAGES, MOCK_TASKS, MOCK_BOUNTY_REQUESTS, type Bubble, type Planet } from '../data/mock';
 import { cn } from '../../lib/utils';
-import { X, Zap, Send, Megaphone, ShoppingBag, Volume2, ArrowUpToLine, Image, Sparkles, Bot, Trophy, MapPin, Users } from 'lucide-react';
+import { X, Zap, Send, Megaphone, ShoppingBag, Volume2, ArrowUpToLine, Image, Sparkles, Bot, BadgeDollarSign, Crown } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 const SHOP_ITEMS = [
@@ -81,6 +81,7 @@ export function Island() {
   const [showSentToast, setShowSentToast] = useState(false);
   const [showShop, setShowShop] = useState(false);
   const [purchasedItem, setPurchasedItem] = useState<string | null>(null);
+  const [showMemberModal, setShowMemberModal] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const BUBBLE_POSITIONS: { x: number; y: number }[] = [
@@ -90,6 +91,7 @@ export function Island() {
   ];
 
   const planetBubbles = MOCK_BUBBLES.filter(b => b.planetId === selectedPlanet.id);
+  const topBounty = MOCK_BOUNTY_REQUESTS[0];
 
   const [visibleBubbles, setVisibleBubbles] = useState<Set<string>>(new Set());
   const [enteringId, setEnteringId] = useState<string | null>(null);
@@ -170,55 +172,24 @@ export function Island() {
       </div>
 
       {/* Bounty Board */}
-      <div className="mx-4 mb-2 rounded-2xl border border-border bg-white/75 p-3 shadow-sm">
-        <div className="mb-2 flex items-center justify-between">
+      {topBounty && (
+        <button
+          onClick={() => setShowMemberModal(true)}
+          className="mx-4 mb-2 overflow-hidden rounded-full bg-white/60 border border-border px-3 py-1.5 text-left active:scale-[0.99] transition-transform"
+        >
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-              <Trophy className="h-4 w-4" />
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold text-foreground">悬赏榜</h2>
-              <p className="text-[11px] text-muted-foreground">求职者发起的实习机会悬赏</p>
-            </div>
+            <BadgeDollarSign className="h-4 w-4 flex-shrink-0 text-coral" />
+            <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">悬赏榜</span>
+              <span className="mx-1 text-border">|</span>
+              {topBounty.seeker.name}：{topBounty.title}
+            </p>
+            <span className="flex-shrink-0 rounded-full bg-coral-light px-2 py-0.5 text-[11px] font-medium text-coral">
+              ¥{topBounty.bounty}
+            </span>
           </div>
-          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] text-foreground">{MOCK_BOUNTY_REQUESTS.length} 条</span>
-        </div>
-
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-          {MOCK_BOUNTY_REQUESTS.map(item => (
-            <button
-              key={item.id}
-              onClick={() => navigate('/messages')}
-              className="w-[76%] max-w-[290px] flex-shrink-0 rounded-xl border border-border bg-white p-3 text-left transition-transform active:scale-[0.98]"
-            >
-              <div className="mb-2 flex items-start gap-2">
-                <img src={item.seeker.avatar} alt={item.seeker.name} className="h-9 w-9 rounded-full object-cover" />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="truncate text-sm font-medium text-foreground">{item.seeker.name}</p>
-                    <span className="flex-shrink-0 rounded-full bg-success-light px-2 py-0.5 text-[10px] text-success">{item.matchScore}%</span>
-                  </div>
-                  <p className="truncate text-[11px] text-muted-foreground">{item.targetRole}</p>
-                </div>
-              </div>
-              <p className="line-clamp-1 text-xs font-medium text-foreground">{item.title}</p>
-              <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-muted-foreground">{item.pitch}</p>
-              <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-                <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{item.location}</span>
-                <span className="font-medium text-amber-600">¥{item.bounty}</span>
-              </div>
-              <div className="mt-2 flex items-center justify-between">
-                <div className="flex min-w-0 gap-1">
-                  {item.tags.slice(0, 2).map(tag => (
-                    <span key={tag} className="truncate rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground">{tag}</span>
-                  ))}
-                </div>
-                <span className="ml-2 flex flex-shrink-0 items-center gap-0.5 text-[10px] text-muted-foreground"><Users className="h-3 w-3" />{item.supporters}</span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
+        </button>
+      )}
 
       {/* Bubble Space */}
       <div
@@ -422,7 +393,7 @@ export function Island() {
                       : selectedBubble.type === 'agent' ? 'bg-rose-100 text-rose-600'
                       : 'bg-primary/10 text-foreground'
                   )}>
-                    {selectedBubble.type === 'talent' ? '接任务' : selectedBubble.type === 'agent' ? '即时任务' : '找人做'}
+                    {selectedBubble.type === 'talent' ? '接任务' : selectedBubble.type === 'agent' ? '任务' : '找人做'}
                   </span>
                   <span className="flex items-center gap-0.5 text-xs text-success"><Sparkles className="h-3 w-3" /> 匹配 {selectedBubble.matchScore}%</span>
                 </div>
@@ -518,6 +489,45 @@ export function Island() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showMemberModal && topBounty && (
+        <div className="fixed inset-0 z-[110] flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowMemberModal(false)} />
+          <div className="relative w-full max-w-[430px] rounded-t-3xl bg-white pb-6 pt-4 animate-slide-up">
+            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-border" />
+            <div className="flex items-center justify-between px-5 mb-4">
+              <div>
+                <h2 className="text-lg font-semibold">会员专属</h2>
+                <p className="text-xs text-muted-foreground">开通会员后可查看悬赏详情并联系发布者</p>
+              </div>
+              <button onClick={() => setShowMemberModal(false)} className="rounded-full p-1.5 hover:bg-secondary transition-colors">
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+            <div className="px-5">
+              <div className="rounded-2xl border border-border bg-secondary/40 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-coral-light text-coral">
+                    <Crown className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">{topBounty.title}</p>
+                    <p className="text-xs text-muted-foreground">{topBounty.targetRole} · {topBounty.location}</p>
+                  </div>
+                  <span className="flex-shrink-0 rounded-full bg-coral-light px-2.5 py-1 text-sm font-semibold text-coral">¥{topBounty.bounty}</span>
+                </div>
+                <p className="mt-3 text-xs leading-relaxed text-muted-foreground">悬赏详情仅会员可见，开通后可查看完整需求、联系方式和报名入口。</p>
+              </div>
+              <button
+                onClick={() => setShowMemberModal(false)}
+                className="mt-4 flex w-full items-center justify-center rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground"
+              >
+                开通会员查看详情
+              </button>
             </div>
           </div>
         </div>

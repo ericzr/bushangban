@@ -475,7 +475,7 @@ export function TaskDetail() {
                   <div className="flex items-start gap-2.5 rounded-xl bg-amber-50 p-3 mb-4">
                     <AlertCircle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs font-medium text-amber-700">即时任务须知</p>
+                      <p className="text-xs font-medium text-amber-700">任务须知</p>
                       <p className="text-[11px] text-amber-600 mt-0.5">接单后需在约定时间内完成，完成后上传凭证即可获得报酬。超时未完成可能影响信用评分。</p>
                     </div>
                   </div>

@@ -160,7 +160,7 @@ export const TASK_TYPE_CONFIG: Record<TaskType, {
   intern:        { label: '实习', color: 'text-info', bgColor: 'bg-info-light', barColor: 'bg-blue-500', badgeClass: 'bg-blue-50 text-blue-600' },
   parttime:      { label: '长期任务', color: 'text-warning', bgColor: 'bg-warning-light', barColor: 'bg-amber-500', badgeClass: 'bg-amber-50 text-amber-600' },
   crowdsourcing: { label: '短期任务', color: 'text-purple', bgColor: 'bg-purple-light', barColor: 'bg-purple-500', badgeClass: 'bg-purple-50 text-purple-600' },
-  agent:         { label: '即时性独立任务', color: 'text-coral', bgColor: 'bg-coral-light', barColor: 'bg-rose-500', badgeClass: 'bg-rose-50 text-rose-600' },
+  agent:         { label: '任务', color: 'text-coral', bgColor: 'bg-coral-light', barColor: 'bg-rose-500', badgeClass: 'bg-rose-50 text-rose-600' },
 };
 
 export const TASK_TYPE_TABS: { key: TaskType | 'all'; label: string }[] = [
@@ -168,7 +168,7 @@ export const TASK_TYPE_TABS: { key: TaskType | 'all'; label: string }[] = [
   { key: 'intern', label: '实习' },
   { key: 'parttime', label: '长期任务' },
   { key: 'crowdsourcing', label: '短期任务' },
-  { key: 'agent', label: '即时性独立任务' },
+  { key: 'agent', label: '任务' },
 ];
 
 export function getTaskTypeLabel(type: TaskType): string {
@@ -511,7 +511,7 @@ export const MOCK_MESSAGES: Message[] = [
 // ─── 兴趣岛数据 ────────────────────────────────────────────
 
 export const MOCK_PLANETS: Planet[] = [
-  { id: 'p7', name: '即时星球', emoji: '⚡', color: '#F43F5E', memberCount: 1128 },
+  { id: 'p7', name: '任务星球', emoji: '⚡', color: '#F43F5E', memberCount: 1128 },
   { id: 'p1', name: '设计星球', emoji: '🎨', color: '#4A8C3F', memberCount: 2341 },
   { id: 'p2', name: '开发星球', emoji: '💻', color: '#1A1A2E', memberCount: 1892 },
   { id: 'p3', name: '文案星球', emoji: '✏️', color: '#6B8C5A', memberCount: 1456 },
@@ -568,7 +568,7 @@ export const MOCK_BUBBLES: Bubble[] = [
   { id: 'b28', type: 'task', title: '广告配乐', matchScore: 78, tags: ['配乐', '广告'], refId: 't3', planetId: 'p6' },
   { id: 'b29', type: 'talent', title: '何歌手', matchScore: 55, avatar: users[2].avatar, tags: ['演唱', '录音'], refId: 'tal3', planetId: 'p6' },
   { id: 'b30', type: 'task', title: '播客片头曲', matchScore: 63, tags: ['音乐', '播客'], refId: 't1', planetId: 'p6' },
-  // ── 即时星球 p7 ──
+  // ── 任务星球 p7 ──
   { id: 'b31', type: 'agent', title: '线下拍摄产品照片', matchScore: 80, tags: ['拍摄', '线下'], refId: 't9', planetId: 'p7' },
   { id: 'b32', type: 'agent', title: '网站注册流程验证', matchScore: 75, tags: ['测试', '线上'], refId: 't10', planetId: 'p7' },
   { id: 'b33', type: 'agent', title: '代办营业执照变更', matchScore: 65, tags: ['代办', '线下'], refId: 't11', planetId: 'p7' },
@@ -591,7 +591,7 @@ export const WORLD_MESSAGES = [
   '✨ 赵天宇 成功匹配了"产品宣传视频剪辑"任务！',
   '💫 欢迎新用户 周思琪 加入设计星球！',
   '🌟 张艾米 的履约率达到了 97%，获得"金牌创作者"徽章！',
-  '⚡ 新即时任务："数据分析日报"正在招募，今天交付！',
+  '⚡ 新任务："数据分析日报"正在招募，今天交付！',
   '🚀 李明 成功接单"私域运营复盘"，开始处理！',
 ];
 
@@ -606,7 +606,7 @@ export interface Banner {
 }
 
 export const MOCK_BANNERS: Banner[] = [
-  { id: 'bn1', title: '即时性独立任务', subtitle: '短平快需求，真人快速响应', gradient: 'from-rose-500 to-orange-500', link: '/?taskType=instant' },
+  { id: 'bn1', title: '任务', subtitle: '短平快需求，真人快速响应', gradient: 'from-rose-500 to-orange-500', link: '/?taskType=instant' },
   { id: 'bn2', title: '短期任务包', subtitle: '按成果付费，分阶段交付', gradient: 'from-purple-500 to-indigo-600', link: '/?taskType=short' },
   { id: 'bn3', title: '长期任务包', subtitle: '持续合作，稳定承接灵活工作', gradient: 'from-amber-500 to-teal-600', link: '/?taskType=long' },
 ];
@@ -626,6 +626,6 @@ export const MOCK_TRANSACTIONS: WalletTransaction[] = [
   { id: 'tx2', type: 'freeze', amount: 3000, description: '任务担保金冻结-小程序开发', createdAt: '2026-03-03T14:00:00Z', status: 'completed' },
   { id: 'tx3', type: 'income', amount: 2000, description: '视频剪辑-全额结算', createdAt: '2026-03-02T16:00:00Z', status: 'completed' },
   { id: 'tx4', type: 'withdraw', amount: 8000, description: '提现到银行卡 ****8842', createdAt: '2026-03-01T09:00:00Z', status: 'completed' },
-  { id: 'tx5', type: 'income', amount: 3500, description: '即时任务服务费-数据分析周报', createdAt: '2026-02-28T18:00:00Z', status: 'completed' },
+  { id: 'tx5', type: 'income', amount: 3500, description: '任务服务费-数据分析周报', createdAt: '2026-02-28T18:00:00Z', status: 'completed' },
   { id: 'tx6', type: 'expense', amount: 1200, description: '世界喇叭曝光费', createdAt: '2026-02-27T12:00:00Z', status: 'completed' },
 ];

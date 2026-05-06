@@ -37,7 +37,7 @@ const TASK_TYPE_OPTIONS: { key: TaskType; label: string; desc: string; Icon: Rea
   { key: 'intern',        label: '实习',    desc: '企业发布实习机会',             Icon: GraduationCap },
   { key: 'parttime',      label: '长期任务', desc: '持续协作，按时或周期结算',     Icon: Clock },
   { key: 'crowdsourcing', label: '短期任务', desc: '按成果付费，支持里程碑',       Icon: Target },
-  { key: 'agent',         label: '即时性独立任务', desc: '短平快需求，真人快速响应', Icon: Bot },
+  { key: 'agent',         label: '任务', desc: '短平快需求，真人快速响应', Icon: Bot },
 ];
 
 const INSTANT_DEADLINES = ['今天', '24小时内', '48小时内', '本周内'];
@@ -141,7 +141,7 @@ export function CreateTask() {
             <div>
               <label className="text-sm text-foreground mb-1.5 flex items-center gap-1">
                 <Briefcase className="h-3.5 w-3.5 text-foreground" />
-                {taskType === 'intern' ? '实习岗位名称' : taskType === 'agent' ? '即时任务名称' : '任务标题'} <span className="text-coral">*</span>
+                {taskType === 'intern' ? '实习岗位名称' : '任务标题'} <span className="text-coral">*</span>
               </label>
               <input {...register('title', { required: true })}
                 placeholder={taskType === 'intern' ? '例如：UI设计实习生' : taskType === 'agent' ? '例如：帮我线下拍摄产品照片' : '例如：为我的品牌设计一套VI系统'}
@@ -208,7 +208,7 @@ export function CreateTask() {
             <div>
               <label className="text-sm text-foreground mb-1.5 flex items-center gap-1">
                 <DollarSign className="h-3.5 w-3.5 text-foreground" />
-                {taskType === 'intern' ? '实习薪资 (¥/月)' : taskType === 'parttime' ? '长期任务预算 (¥/时或周期)' : taskType === 'agent' ? '即时任务预算 (¥)' : '短期任务预算 (¥)'}
+                {taskType === 'intern' ? '实习薪资 (¥/月)' : taskType === 'parttime' ? '长期任务预算 (¥/时或周期)' : taskType === 'agent' ? '任务预算 (¥)' : '短期任务预算 (¥)'}
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <input type="number" {...register('budgetMin')} placeholder={pp.min}

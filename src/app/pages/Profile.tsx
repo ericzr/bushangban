@@ -518,7 +518,7 @@ export function Profile() {
                 {[
                   { title: '品牌VI全案设计', status: '进行中', applicants: 12, budget: '¥8,000-15,000', type: '众包' },
                   { title: '前端开发工程师（React）', status: '招聘中', applicants: 28, budget: '¥15,000-25,000/月', type: '全职' },
-                  { title: '帮我去门店拍摄产品照', status: '已完成', applicants: 6, budget: '¥150-300', type: '即时任务' },
+                  { title: '帮我去门店拍摄产品照', status: '已完成', applicants: 6, budget: '¥150-300', type: '任务' },
                   { title: '小红书代运营', status: '已完成', applicants: 8, budget: '¥3,000-6,000', type: '长期任务' },
                 ].map(task => (
                   <div key={task.title} className="rounded-2xl bg-white border border-border p-3.5">

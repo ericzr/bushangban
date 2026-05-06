@@ -90,7 +90,7 @@ export function TaskCard({ task, className }: TaskCardProps) {
             <div className="flex items-center gap-2 flex-wrap">
               {task.isInstant && (
                 <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-50 text-amber-600 px-2 py-0.5 text-[11px] font-medium">
-                  <Zap className="h-2.5 w-2.5" />即时任务
+                  <Zap className="h-2.5 w-2.5" />任务
                 </span>
               )}
               {task.deliveryMode && (
