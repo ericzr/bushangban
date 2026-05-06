@@ -2,24 +2,22 @@ import { useState, useEffect, useRef } from 'react';
 import { MOCK_TASKS, MOCK_BANNERS, SKILL_CATEGORIES } from '../data/mock';
 import { TaskCard } from '../components/TaskCard';
 import { CityPickerModal } from '../components/CityPickerModal';
-import { Plus, ChevronRight, GraduationCap, Clock, Target, Package, SlidersHorizontal, X, MapPin, DollarSign, Wifi } from 'lucide-react';
+import { Plus, ChevronRight, GraduationCap, Clock, Package, SlidersHorizontal, X, MapPin, DollarSign, Wifi, Zap } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Link, useSearchParams } from 'react-router';
 
-type MainTabKey = 'all' | 'intern' | 'parttime' | 'package';
-type SubTabKey = 'all' | 'crowdsourcing' | 'agent';
+type MainTabKey = 'package' | 'intern';
+type SubTabKey = 'long' | 'short' | 'instant';
 
 const MAIN_TABS: { key: MainTabKey; label: string; icon: React.ElementType }[] = [
-  { key: 'all', label: '全部', icon: Target },
-  { key: 'intern', label: '实习', icon: GraduationCap },
-  { key: 'parttime', label: '兼职', icon: Clock },
   { key: 'package', label: '任务包', icon: Package },
+  { key: 'intern', label: '实习', icon: GraduationCap },
 ];
 
-const SUB_TABS: { key: SubTabKey; label: string; emoji: string }[] = [
-  { key: 'all', label: '全部', emoji: '·' },
-  { key: 'crowdsourcing', label: '众包任务', emoji: '👥' },
-  { key: 'agent', label: 'Agent任务', emoji: '🤖' },
+const SUB_TABS: { key: SubTabKey; label: string; icon: React.ElementType; activeClass: string; barClass: string }[] = [
+  { key: 'long', label: '长期', icon: Clock, activeClass: 'text-amber-600', barClass: 'bg-amber-500' },
+  { key: 'short', label: '短期', icon: Package, activeClass: 'text-purple-600', barClass: 'bg-purple-500' },
+  { key: 'instant', label: '即时性独立任务', icon: Zap, activeClass: 'text-rose-600', barClass: 'bg-rose-500' },
 ];
 
 const BUDGET_OPTIONS = ['全部', '1k以下', '1k-5k', '5k-1w', '1w-5w', '5w以上'];
@@ -28,8 +26,8 @@ const SORT_OPTIONS = ['默认排序', '最新发布', '预算最高', '匹配度
 
 export function Home() {
   const [activeCategory, setActiveCategory] = useState('全部');
-  const [activeMain, setActiveMain] = useState<MainTabKey>('all');
-  const [activeSub, setActiveSub] = useState<SubTabKey>('all');
+  const [activeMain, setActiveMain] = useState<MainTabKey>('package');
+  const [activeSub, setActiveSub] = useState<SubTabKey>('short');
   const [bannerIdx, setBannerIdx] = useState(0);
   const [searchParams] = useSearchParams();
   const bannerTimer = useRef<ReturnType<typeof setInterval>>();
@@ -45,9 +43,9 @@ export function Home() {
     const typeParam = searchParams.get('taskType');
     if (typeParam) {
       if (typeParam === 'intern') { setActiveMain('intern'); }
-      else if (typeParam === 'parttime') { setActiveMain('parttime'); }
-      else if (typeParam === 'crowdsourcing') { setActiveMain('package'); setActiveSub('crowdsourcing'); }
-      else if (typeParam === 'agent') { setActiveMain('package'); setActiveSub('agent'); }
+      else if (typeParam === 'parttime' || typeParam === 'long') { setActiveMain('package'); setActiveSub('long'); }
+      else if (typeParam === 'crowdsourcing' || typeParam === 'short') { setActiveMain('package'); setActiveSub('short'); }
+      else if (typeParam === 'agent' || typeParam === 'instant') { setActiveMain('package'); setActiveSub('instant'); }
     }
   }, [searchParams]);
 
@@ -74,11 +72,10 @@ export function Home() {
 
   let filteredTasks = MOCK_TASKS.filter(task => {
     if (activeMain === 'intern' && task.type !== 'intern') return false;
-    if (activeMain === 'parttime' && task.type !== 'parttime') return false;
     if (activeMain === 'package') {
-      if (activeSub === 'crowdsourcing' && task.type !== 'crowdsourcing') return false;
-      if (activeSub === 'agent' && task.type !== 'agent') return false;
-      if (activeSub === 'all' && task.type !== 'crowdsourcing' && task.type !== 'agent') return false;
+      if (activeSub === 'long' && task.type !== 'parttime') return false;
+      if (activeSub === 'short' && task.type !== 'crowdsourcing') return false;
+      if (activeSub === 'instant' && task.type !== 'agent') return false;
     }
     if (activeCategory !== '全部' && !task.tags.includes(activeCategory)) return false;
     if (filterRegion !== '全部' && task.location !== filterRegion && task.location !== '远程') return false;
@@ -105,14 +102,14 @@ export function Home() {
   const handleBannerClick = () => {
     if (banner.link?.includes('taskType=')) {
       const type = banner.link.split('taskType=')[1];
-      if (type === 'intern') { setActiveMain('intern'); setActiveSub('all'); }
-      else if (type === 'parttime') { setActiveMain('parttime'); setActiveSub('all'); }
-      else if (type === 'crowdsourcing') { setActiveMain('package'); setActiveSub('crowdsourcing'); }
-      else if (type === 'agent') { setActiveMain('package'); setActiveSub('agent'); }
+      if (type === 'intern') { setActiveMain('intern'); }
+      else if (type === 'parttime' || type === 'long') { setActiveMain('package'); setActiveSub('long'); }
+      else if (type === 'crowdsourcing' || type === 'short') { setActiveMain('package'); setActiveSub('short'); }
+      else if (type === 'agent' || type === 'instant') { setActiveMain('package'); setActiveSub('instant'); }
     }
   };
 
-  const showDeliveryFilter = activeMain === 'package' || activeMain === 'all';
+  const showDeliveryFilter = activeMain === 'package';
 
   return (
     <div className="flex flex-col pb-4">
@@ -161,15 +158,11 @@ export function Home() {
                   isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/70',
                 )}
               >
-                {!isPackage && (
-                  <tab.icon className={cn('h-4 w-4', isActive ? (tab.key === 'intern' ? 'text-blue-500' : tab.key === 'parttime' ? 'text-amber-500' : '') : '')} />
-                )}
+                <tab.icon className={cn('h-4 w-4', isActive && (isPackage ? 'text-purple-500' : 'text-blue-500'))} />
                 <span>{tab.label}</span>
                 {isActive && (
                   <span className={cn('absolute bottom-0 left-1/2 -translate-x-1/2 h-[3px] w-10 rounded-full',
-                    tab.key === 'intern' ? 'bg-blue-500' :
-                    tab.key === 'parttime' ? 'bg-amber-500' :
-                    tab.key === 'package' ? 'bg-purple-500' : 'bg-foreground'
+                    isPackage ? 'bg-purple-500' : 'bg-blue-500'
                   )} />
                 )}
               </button>
@@ -180,26 +173,25 @@ export function Home() {
         {/* 任务包 Sub-tabs — segmented control */}
         {activeMain === 'package' && (
           <div className="px-4 py-2 border-b border-border/50">
-            <div className="inline-flex bg-secondary rounded-xl p-0.5 gap-0">
-              {SUB_TABS.map(sub => (
-                <button
-                  key={sub.key}
-                  onClick={() => setActiveSub(sub.key)}
-                  className={cn(
-                    'flex items-center gap-1.5 px-4 py-1.5 rounded-[10px] text-xs font-medium transition-all',
-                    activeSub === sub.key
-                      ? sub.key === 'agent'
-                        ? 'bg-white shadow-sm text-rose-600'
-                        : sub.key === 'crowdsourcing'
-                          ? 'bg-white shadow-sm text-purple-600'
-                          : 'bg-white shadow-sm text-foreground'
-                      : 'text-muted-foreground'
-                  )}
-                >
-                  {sub.key !== 'all' && <span className="text-sm leading-none">{sub.emoji}</span>}
-                  {sub.label}
-                </button>
-              ))}
+            <div className="grid grid-cols-3 bg-secondary rounded-xl p-0.5 gap-0">
+              {SUB_TABS.map(sub => {
+                const active = activeSub === sub.key;
+                const Icon = sub.icon;
+
+                return (
+                  <button
+                    key={sub.key}
+                    onClick={() => setActiveSub(sub.key)}
+                    className={cn(
+                      'flex min-w-0 items-center justify-center gap-1 px-2 py-1.5 rounded-[10px] text-xs font-medium transition-all',
+                      active ? `bg-white shadow-sm ${sub.activeClass}` : 'text-muted-foreground'
+                    )}
+                  >
+                    <Icon className="h-3.5 w-3.5 flex-shrink-0" />
+                    <span className="truncate">{sub.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}

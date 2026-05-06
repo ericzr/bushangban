@@ -34,13 +34,13 @@ const URGENCY_LEVELS = [
 ];
 
 const TASK_TYPE_OPTIONS: { key: TaskType; label: string; desc: string; Icon: React.ElementType }[] = [
-  { key: 'intern',        label: '实习',    desc: '实习岗位，培养新人',           Icon: GraduationCap },
-  { key: 'parttime',      label: '兼职',    desc: '灵活时间，按时计费',           Icon: Clock },
-  { key: 'crowdsourcing', label: '众包任务', desc: '按成果付费，支持里程碑',       Icon: Target },
-  { key: 'agent',         label: 'Agent任务', desc: '自动化Agent，周期持续服务', Icon: Bot },
+  { key: 'intern',        label: '实习',    desc: '企业发布实习机会',             Icon: GraduationCap },
+  { key: 'parttime',      label: '长期任务', desc: '持续协作，按时或周期结算',     Icon: Clock },
+  { key: 'crowdsourcing', label: '短期任务', desc: '按成果付费，支持里程碑',       Icon: Target },
+  { key: 'agent',         label: '即时性独立任务', desc: '短平快需求，真人快速响应', Icon: Bot },
 ];
 
-const AGENT_CYCLES = ['每周', '每两周', '每月', '每季度'];
+const INSTANT_DEADLINES = ['今天', '24小时内', '48小时内', '本周内'];
 
 export function CreateTask() {
   const { register, handleSubmit, formState: { errors }, watch } = useForm({
@@ -59,7 +59,7 @@ export function CreateTask() {
 
   const [taskType, setTaskType] = useState<TaskType>('crowdsourcing');
   const [milestones, setMilestones] = useState<{ name: string; pct: number }[]>([{ name: '', pct: 100 }]);
-  const [agentCycle, setAgentCycle] = useState('每月');
+  const [instantDeadline, setInstantDeadline] = useState('24小时内');
 
   const typeConfig = TASK_TYPE_CONFIG[taskType];
 
@@ -72,7 +72,7 @@ export function CreateTask() {
   const removeTag = (tag: string) => setTags(tags.filter(t => t !== tag));
 
   const onSubmit = (data: any) => {
-    console.log({ ...data, tags, workMode, urgency, headcount, selectedCategory, taskType, milestones, agentCycle });
+    console.log({ ...data, tags, workMode, urgency, headcount, selectedCategory, taskType, milestones, instantDeadline });
     setShowSuccess(true);
     setTimeout(() => { setShowSuccess(false); navigate('/'); }, 2000);
   };
@@ -84,7 +84,7 @@ export function CreateTask() {
   const pricePlaceholder = () => {
     if (taskType === 'intern') return { min: '3000', max: '6000', unit: '/月' };
     if (taskType === 'parttime') return { min: '100', max: '300', unit: '/时' };
-    if (taskType === 'agent') return { min: '5000', max: '15000', unit: '/周期' };
+    if (taskType === 'agent') return { min: '100', max: '500', unit: '' };
     return { min: '1000', max: '5000', unit: '' };
   };
   const pp = pricePlaceholder();
@@ -141,10 +141,10 @@ export function CreateTask() {
             <div>
               <label className="text-sm text-foreground mb-1.5 flex items-center gap-1">
                 <Briefcase className="h-3.5 w-3.5 text-foreground" />
-                {taskType === 'intern' ? '实习岗位名称' : taskType === 'agent' ? 'Agent 服务名称' : '任务标题'} <span className="text-coral">*</span>
+                {taskType === 'intern' ? '实习岗位名称' : taskType === 'agent' ? '即时任务名称' : '任务标题'} <span className="text-coral">*</span>
               </label>
               <input {...register('title', { required: true })}
-                placeholder={taskType === 'intern' ? '例如：UI设计实习生' : taskType === 'agent' ? '例如：数据分析Agent-周期服务' : '例如：为我的品牌设计一套VI系统'}
+                placeholder={taskType === 'intern' ? '例如：UI设计实习生' : taskType === 'agent' ? '例如：帮我线下拍摄产品照片' : '例如：为我的品牌设计一套VI系统'}
                 maxLength={50}
                 className="w-full rounded-2xl border border-border bg-secondary/30 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
               />
@@ -173,7 +173,7 @@ export function CreateTask() {
             <div>
               <label className="text-sm text-foreground mb-1.5 block">详细描述 <span className="text-coral">*</span></label>
               <textarea {...register('description', { required: true })}
-                placeholder={taskType === 'agent' ? '描述你需要Agent提供的持续服务内容、交付要求、沟通频率...' : '详细描述你需要完成的工作内容、具体要求和期望效果...'}
+                placeholder={taskType === 'agent' ? '描述需要真人快速完成的事项、地点、交付要求和时间限制...' : '详细描述你需要完成的工作内容、具体要求和期望效果...'}
                 rows={5}
                 className="w-full rounded-2xl border border-border bg-secondary/30 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/10 resize-none transition-all"
               />
@@ -208,7 +208,7 @@ export function CreateTask() {
             <div>
               <label className="text-sm text-foreground mb-1.5 flex items-center gap-1">
                 <DollarSign className="h-3.5 w-3.5 text-foreground" />
-                {taskType === 'intern' ? '实习薪资 (¥/月)' : taskType === 'parttime' ? '时薪范围 (¥/时)' : taskType === 'agent' ? '服务费范围 (¥/周期)' : '预算范围 (¥)'}
+                {taskType === 'intern' ? '实习薪资 (¥/月)' : taskType === 'parttime' ? '长期任务预算 (¥/时或周期)' : taskType === 'agent' ? '即时任务预算 (¥)' : '短期任务预算 (¥)'}
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <input type="number" {...register('budgetMin')} placeholder={pp.min}
@@ -218,15 +218,15 @@ export function CreateTask() {
               </div>
             </div>
 
-            {/* Agent Cycle */}
+            {/* Instant task timing */}
             {taskType === 'agent' && (
               <div>
-                <label className="text-sm text-foreground mb-2 flex items-center gap-1"><RefreshCw className="h-3.5 w-3.5" /> 服务周期</label>
+                <label className="text-sm text-foreground mb-2 flex items-center gap-1"><RefreshCw className="h-3.5 w-3.5" /> 完成时限</label>
                 <div className="flex flex-wrap gap-2">
-                  {AGENT_CYCLES.map(c => (
-                    <button key={c} type="button" onClick={() => setAgentCycle(c)}
+                  {INSTANT_DEADLINES.map(c => (
+                    <button key={c} type="button" onClick={() => setInstantDeadline(c)}
                       className={cn('rounded-full px-3.5 py-1.5 text-sm border transition-all',
-                        agentCycle === c ? 'bg-rose-50 border-rose-300 text-rose-600' : 'bg-white/60 border-border text-muted-foreground'
+                        instantDeadline === c ? 'bg-rose-50 border-rose-300 text-rose-600' : 'bg-white/60 border-border text-muted-foreground'
                       )}>{c}</button>
                   ))}
                 </div>
@@ -286,7 +286,7 @@ export function CreateTask() {
 
             {/* Deadline */}
             <div>
-              <label className="text-sm text-foreground mb-1.5 flex items-center gap-1"><CalendarDays className="h-3.5 w-3.5" /> {taskType === 'fulltime' ? '截止投递日期' : '截止日期'}</label>
+              <label className="text-sm text-foreground mb-1.5 flex items-center gap-1"><CalendarDays className="h-3.5 w-3.5" /> {taskType === 'intern' ? '截止投递日期' : '截止日期'}</label>
               <input type="date" {...register('deadline')}
                 className="w-full rounded-2xl border border-border bg-secondary/30 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/10" />
             </div>
@@ -359,7 +359,7 @@ export function CreateTask() {
                   <h3 className="text-sm text-foreground flex-1 pr-2">{watch('title') || '未填写标题'}</h3>
                   <div className="flex gap-1.5">
                     <span className={cn('rounded-md px-2 py-0.5 text-[11px]', typeConfig.badgeClass)}>
-                      {taskType === 'fulltime' && subType === 'intern' ? '实习' : typeConfig.label}
+                      {typeConfig.label}
                     </span>
                     <span className={cn('rounded-full px-2 py-0.5 text-xs flex-shrink-0', URGENCY_LEVELS.find(u => u.value === urgency)?.colorClass)}>
                       {URGENCY_LEVELS.find(u => u.value === urgency)?.label}
@@ -370,7 +370,7 @@ export function CreateTask() {
                   {selectedCategory && (() => { const cat = TASK_CATEGORIES.find(c => c.value === selectedCategory); return cat ? <span className="flex items-center gap-0.5"><cat.Icon className="h-3 w-3" />{cat.label}</span> : null; })()}
                   {(() => { const wm = WORK_MODES.find(w => w.value === workMode); return wm ? <span className="flex items-center gap-0.5"><wm.Icon className="h-3 w-3" /> {wm.label}</span> : null; })()}
                   <span className="flex items-center gap-0.5"><Users className="h-3 w-3" /> {headcount}人</span>
-                  {taskType === 'agent' && <span className="flex items-center gap-0.5"><RefreshCw className="h-3 w-3" /> {agentCycle}</span>}
+                  {taskType === 'agent' && <span className="flex items-center gap-0.5"><RefreshCw className="h-3 w-3" /> {instantDeadline}</span>}
                 </div>
               </div>
               <div className="p-4 space-y-3">

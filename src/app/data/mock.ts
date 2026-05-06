@@ -133,6 +133,21 @@ export interface WalletTransaction {
   status: 'completed' | 'pending' | 'failed';
 }
 
+export interface BountyRequest {
+  id: string;
+  title: string;
+  seeker: User;
+  targetRole: string;
+  expectedPay: string;
+  location: string;
+  deadline: string;
+  matchScore: number;
+  tags: string[];
+  pitch: string;
+  bounty: number;
+  supporters: number;
+}
+
 // ─── 任务类型配置 ──────────────────────────────────────────
 
 export const TASK_TYPE_CONFIG: Record<TaskType, {
@@ -143,17 +158,17 @@ export const TASK_TYPE_CONFIG: Record<TaskType, {
   badgeClass: string;
 }> = {
   intern:        { label: '实习', color: 'text-info', bgColor: 'bg-info-light', barColor: 'bg-blue-500', badgeClass: 'bg-blue-50 text-blue-600' },
-  parttime:      { label: '兼职', color: 'text-warning', bgColor: 'bg-warning-light', barColor: 'bg-amber-500', badgeClass: 'bg-amber-50 text-amber-600' },
-  crowdsourcing: { label: '众包任务', color: 'text-purple', bgColor: 'bg-purple-light', barColor: 'bg-purple-500', badgeClass: 'bg-purple-50 text-purple-600' },
-  agent:         { label: 'Agent任务', color: 'text-coral', bgColor: 'bg-coral-light', barColor: 'bg-rose-500', badgeClass: 'bg-rose-50 text-rose-600' },
+  parttime:      { label: '长期任务', color: 'text-warning', bgColor: 'bg-warning-light', barColor: 'bg-amber-500', badgeClass: 'bg-amber-50 text-amber-600' },
+  crowdsourcing: { label: '短期任务', color: 'text-purple', bgColor: 'bg-purple-light', barColor: 'bg-purple-500', badgeClass: 'bg-purple-50 text-purple-600' },
+  agent:         { label: '即时性独立任务', color: 'text-coral', bgColor: 'bg-coral-light', barColor: 'bg-rose-500', badgeClass: 'bg-rose-50 text-rose-600' },
 };
 
 export const TASK_TYPE_TABS: { key: TaskType | 'all'; label: string }[] = [
   { key: 'all', label: '全部' },
   { key: 'intern', label: '实习' },
-  { key: 'parttime', label: '兼职' },
-  { key: 'crowdsourcing', label: '众包任务' },
-  { key: 'agent', label: 'Agent任务' },
+  { key: 'parttime', label: '长期任务' },
+  { key: 'crowdsourcing', label: '短期任务' },
+  { key: 'agent', label: '即时性独立任务' },
 ];
 
 export function getTaskTypeLabel(type: TaskType): string {
@@ -262,7 +277,7 @@ export const MOCK_TASKS: Task[] = [
     deliveryMode: 'online', isInstant: false,
   },
   {
-    id: 't3', title: '小红书种草文案撰写（长期兼职）', type: 'parttime', priceType: 'hourly',
+    id: 't3', title: '小红书种草文案撰写（长期任务）', type: 'parttime', priceType: 'hourly',
     description: '美妆品牌寻找长期合作的文案写手，每周3-5篇小红书种草笔记。需要熟悉小红书平台规则，有过爆款笔记经验优先。',
     budgetMin: 200, budgetMax: 500, tags: ['文案', '小红书', '美妆'], status: 'open',
     author: users[2], createdAt: '2026-03-01T09:15:00Z', applicants: 12, likes: 34, comments: 11,
@@ -436,6 +451,53 @@ export const MOCK_TALENTS: Talent[] = [
   { id: 'tal6', user: users[0], acceptTypes: ['品牌策划', '视觉设计', '市场推广'], matchScore: 85, portfolio: [], hourlyRate: '350-600', description: '专注品牌全案策划10年+，从品牌定位到视觉落地一站式服务。为100+品牌提供过成功的品牌升级方案。', completedProjects: 54, completionRate: 96, rating: 4.9 },
 ];
 
+// ─── 求职悬赏 ──────────────────────────────────────────────
+
+export const MOCK_BOUNTY_REQUESTS: BountyRequest[] = [
+  {
+    id: 'br1',
+    title: '寻找远程产品运营实习机会',
+    seeker: users[2],
+    targetRole: '产品运营实习',
+    expectedPay: '¥3k-5k/月',
+    location: '远程 / 杭州',
+    deadline: '2026-05-20',
+    matchScore: 91,
+    tags: ['产品运营', '数据分析', '内容增长'],
+    pitch: '有小红书内容增长经验，希望进入真实业务团队做用户运营和活动复盘。',
+    bounty: 280,
+    supporters: 16,
+  },
+  {
+    id: 'br2',
+    title: '求一份 AI 产品设计实习内推',
+    seeker: users[4],
+    targetRole: 'AI 产品设计实习',
+    expectedPay: '¥4k-7k/月',
+    location: '上海 / 远程',
+    deadline: '2026-05-30',
+    matchScore: 87,
+    tags: ['UI设计', 'Figma', 'AI产品'],
+    pitch: '作品集包含 3 个移动端项目，想找能接触智能产品工作流的设计实习。',
+    bounty: 360,
+    supporters: 22,
+  },
+  {
+    id: 'br3',
+    title: '大四前端求实习面试机会',
+    seeker: users[1],
+    targetRole: '前端开发实习',
+    expectedPay: '¥4k-6k/月',
+    location: '深圳 / 广州',
+    deadline: '2026-05-18',
+    matchScore: 83,
+    tags: ['React', 'TypeScript', '小程序'],
+    pitch: '做过电商小程序和后台系统，希望加入工程氛围扎实的团队。',
+    bounty: 240,
+    supporters: 14,
+  },
+];
+
 // ─── 消息数据 ──────────────────────────────────────────────
 
 export const MOCK_MESSAGES: Message[] = [
@@ -449,7 +511,7 @@ export const MOCK_MESSAGES: Message[] = [
 // ─── 兴趣岛数据 ────────────────────────────────────────────
 
 export const MOCK_PLANETS: Planet[] = [
-  { id: 'p7', name: 'Agent星球', emoji: '🤖', color: '#F43F5E', memberCount: 1128 },
+  { id: 'p7', name: '即时星球', emoji: '⚡', color: '#F43F5E', memberCount: 1128 },
   { id: 'p1', name: '设计星球', emoji: '🎨', color: '#4A8C3F', memberCount: 2341 },
   { id: 'p2', name: '开发星球', emoji: '💻', color: '#1A1A2E', memberCount: 1892 },
   { id: 'p3', name: '文案星球', emoji: '✏️', color: '#6B8C5A', memberCount: 1456 },
@@ -506,7 +568,7 @@ export const MOCK_BUBBLES: Bubble[] = [
   { id: 'b28', type: 'task', title: '广告配乐', matchScore: 78, tags: ['配乐', '广告'], refId: 't3', planetId: 'p6' },
   { id: 'b29', type: 'talent', title: '何歌手', matchScore: 55, avatar: users[2].avatar, tags: ['演唱', '录音'], refId: 'tal3', planetId: 'p6' },
   { id: 'b30', type: 'task', title: '播客片头曲', matchScore: 63, tags: ['音乐', '播客'], refId: 't1', planetId: 'p6' },
-  // ── Agent星球 p7 ──
+  // ── 即时星球 p7 ──
   { id: 'b31', type: 'agent', title: '线下拍摄产品照片', matchScore: 80, tags: ['拍摄', '线下'], refId: 't9', planetId: 'p7' },
   { id: 'b32', type: 'agent', title: '网站注册流程验证', matchScore: 75, tags: ['测试', '线上'], refId: 't10', planetId: 'p7' },
   { id: 'b33', type: 'agent', title: '代办营业执照变更', matchScore: 65, tags: ['代办', '线下'], refId: 't11', planetId: 'p7' },
@@ -529,8 +591,8 @@ export const WORLD_MESSAGES = [
   '✨ 赵天宇 成功匹配了"产品宣传视频剪辑"任务！',
   '💫 欢迎新用户 周思琪 加入设计星球！',
   '🌟 张艾米 的履约率达到了 97%，获得"金牌创作者"徽章！',
-  '🤖 新Agent需求："数据分析Agent"正在招募，周期服务！',
-  '🚀 李明 成功接单"私域运营Agent"，开始周期服务！',
+  '⚡ 新即时任务："数据分析日报"正在招募，今天交付！',
+  '🚀 李明 成功接单"私域运营复盘"，开始处理！',
 ];
 
 // ─── Banner数据 ────────────────────────────────────────────
@@ -544,9 +606,9 @@ export interface Banner {
 }
 
 export const MOCK_BANNERS: Banner[] = [
-  { id: 'bn1', title: '雇佣人类', subtitle: '即时发布需求，真人快速响应', gradient: 'from-rose-500 to-purple-600', link: '/?taskType=agent' },
-  { id: 'bn2', title: '众包任务大厅', subtitle: '按结果付费，分阶段交付', gradient: 'from-purple-500 to-indigo-600', link: '/?taskType=crowdsourcing' },
-  { id: 'bn3', title: '灵活兼职', subtitle: '自由安排时间，轻松赚外快', gradient: 'from-amber-500 to-orange-600', link: '/?taskType=parttime' },
+  { id: 'bn1', title: '即时性独立任务', subtitle: '短平快需求，真人快速响应', gradient: 'from-rose-500 to-orange-500', link: '/?taskType=instant' },
+  { id: 'bn2', title: '短期任务包', subtitle: '按成果付费，分阶段交付', gradient: 'from-purple-500 to-indigo-600', link: '/?taskType=short' },
+  { id: 'bn3', title: '长期任务包', subtitle: '持续合作，稳定承接灵活工作', gradient: 'from-amber-500 to-teal-600', link: '/?taskType=long' },
 ];
 
 // ─── 钱包数据 ──────────────────────────────────────────────
@@ -564,6 +626,6 @@ export const MOCK_TRANSACTIONS: WalletTransaction[] = [
   { id: 'tx2', type: 'freeze', amount: 3000, description: '任务担保金冻结-小程序开发', createdAt: '2026-03-03T14:00:00Z', status: 'completed' },
   { id: 'tx3', type: 'income', amount: 2000, description: '视频剪辑-全额结算', createdAt: '2026-03-02T16:00:00Z', status: 'completed' },
   { id: 'tx4', type: 'withdraw', amount: 8000, description: '提现到银行卡 ****8842', createdAt: '2026-03-01T09:00:00Z', status: 'completed' },
-  { id: 'tx5', type: 'income', amount: 3500, description: 'Agent服务费-数据分析周报', createdAt: '2026-02-28T18:00:00Z', status: 'completed' },
+  { id: 'tx5', type: 'income', amount: 3500, description: '即时任务服务费-数据分析周报', createdAt: '2026-02-28T18:00:00Z', status: 'completed' },
   { id: 'tx6', type: 'expense', amount: 1200, description: '世界喇叭曝光费', createdAt: '2026-02-27T12:00:00Z', status: 'completed' },
 ];

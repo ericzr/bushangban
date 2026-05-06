@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { MOCK_PLANETS, MOCK_BUBBLES, WORLD_MESSAGES, MOCK_TASKS, type Bubble, type Planet } from '../data/mock';
+import { MOCK_PLANETS, MOCK_BUBBLES, WORLD_MESSAGES, MOCK_TASKS, MOCK_BOUNTY_REQUESTS, type Bubble, type Planet } from '../data/mock';
 import { cn } from '../../lib/utils';
-import { X, Zap, Send, Megaphone, ShoppingBag, Volume2, ArrowUpToLine, Image, Sparkles, Bot } from 'lucide-react';
+import { X, Zap, Send, Megaphone, ShoppingBag, Volume2, ArrowUpToLine, Image, Sparkles, Bot, Trophy, MapPin, Users } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 const SHOP_ITEMS = [
@@ -57,7 +57,7 @@ const BUBBLE_STYLE: Record<Bubble['type'], { bg: string; ring: string; label: st
   agent: {
     bg: 'bg-rose-50/90',
     ring: 'ring-rose-200',
-    label: 'Agent',
+    label: '即时',
     labelBg: 'bg-rose-500 text-white',
     dotColor: 'bg-rose-400',
     shadowColor: 'rgba(244,63,94,0.2)',
@@ -166,6 +166,57 @@ export function Island() {
         <div className="flex items-center gap-2">
           <Megaphone className="h-4 w-4 flex-shrink-0 text-warning" />
           <p className="text-xs text-muted-foreground truncate animate-pulse">{allMessages[currentMsg]}</p>
+        </div>
+      </div>
+
+      {/* Bounty Board */}
+      <div className="mx-4 mb-2 rounded-2xl border border-border bg-white/75 p-3 shadow-sm">
+        <div className="mb-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+              <Trophy className="h-4 w-4" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-foreground">悬赏榜</h2>
+              <p className="text-[11px] text-muted-foreground">求职者发起的实习机会悬赏</p>
+            </div>
+          </div>
+          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] text-foreground">{MOCK_BOUNTY_REQUESTS.length} 条</span>
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+          {MOCK_BOUNTY_REQUESTS.map(item => (
+            <button
+              key={item.id}
+              onClick={() => navigate('/messages')}
+              className="w-[76%] max-w-[290px] flex-shrink-0 rounded-xl border border-border bg-white p-3 text-left transition-transform active:scale-[0.98]"
+            >
+              <div className="mb-2 flex items-start gap-2">
+                <img src={item.seeker.avatar} alt={item.seeker.name} className="h-9 w-9 rounded-full object-cover" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="truncate text-sm font-medium text-foreground">{item.seeker.name}</p>
+                    <span className="flex-shrink-0 rounded-full bg-success-light px-2 py-0.5 text-[10px] text-success">{item.matchScore}%</span>
+                  </div>
+                  <p className="truncate text-[11px] text-muted-foreground">{item.targetRole}</p>
+                </div>
+              </div>
+              <p className="line-clamp-1 text-xs font-medium text-foreground">{item.title}</p>
+              <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-muted-foreground">{item.pitch}</p>
+              <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{item.location}</span>
+                <span className="font-medium text-amber-600">¥{item.bounty}</span>
+              </div>
+              <div className="mt-2 flex items-center justify-between">
+                <div className="flex min-w-0 gap-1">
+                  {item.tags.slice(0, 2).map(tag => (
+                    <span key={tag} className="truncate rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground">{tag}</span>
+                  ))}
+                </div>
+                <span className="ml-2 flex flex-shrink-0 items-center gap-0.5 text-[10px] text-muted-foreground"><Users className="h-3 w-3" />{item.supporters}</span>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
 
@@ -297,7 +348,7 @@ export function Island() {
           </div>
           <div className="flex items-center gap-1.5">
             <div className="h-2.5 w-2.5 rounded-full bg-rose-400" />
-            <span className="text-[11px] text-muted-foreground">Agent</span>
+            <span className="text-[11px] text-muted-foreground">即时</span>
           </div>
         </div>
         <button
@@ -371,7 +422,7 @@ export function Island() {
                       : selectedBubble.type === 'agent' ? 'bg-rose-100 text-rose-600'
                       : 'bg-primary/10 text-foreground'
                   )}>
-                    {selectedBubble.type === 'talent' ? '接任务' : selectedBubble.type === 'agent' ? 'Agent 服务' : '找人做'}
+                    {selectedBubble.type === 'talent' ? '接任务' : selectedBubble.type === 'agent' ? '即时任务' : '找人做'}
                   </span>
                   <span className="flex items-center gap-0.5 text-xs text-success"><Sparkles className="h-3 w-3" /> 匹配 {selectedBubble.matchScore}%</span>
                 </div>
