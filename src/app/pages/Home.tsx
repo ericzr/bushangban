@@ -14,9 +14,9 @@ const MAIN_TABS: { key: MainTabKey; label: string; icon: React.ElementType }[] =
   { key: 'intern', label: '实习', icon: GraduationCap },
 ];
 
-const SUB_TABS: { key: SubTabKey; label: string; desc: string; icon: React.ElementType; activeClass: string; activeBg: string }[] = [
-  { key: 'long', label: '长期', desc: '持续协作', icon: Clock, activeClass: 'text-amber-700', activeBg: 'bg-amber-50 border-amber-200' },
-  { key: 'short', label: '短期', desc: '项目/单次任务', icon: Package, activeClass: 'text-purple-700', activeBg: 'bg-purple-50 border-purple-200' },
+const SUB_TABS: { key: SubTabKey; label: string; icon: React.ElementType; activeClass: string; activeBg: string }[] = [
+  { key: 'short', label: '短期', icon: Package, activeClass: 'text-purple-700', activeBg: 'bg-purple-50 border-purple-200' },
+  { key: 'long', label: '长期', icon: Clock, activeClass: 'text-amber-700', activeBg: 'bg-amber-50 border-amber-200' },
 ];
 
 const BUDGET_OPTIONS = ['全部', '1k以下', '1k-5k', '5k-1w', '1w-5w', '5w以上'];
@@ -165,44 +165,38 @@ export function Home() {
           })}
         </div>
 
-        {/* 任务包周期筛选 */}
-        {activeMain === 'package' && (
-          <div className="border-b border-border/50 px-4 py-2.5">
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-              {SUB_TABS.map(sub => {
-                const active = activeSub === sub.key;
-                const Icon = sub.icon;
-
-                return (
-                  <button
-                    key={sub.key}
-                    onClick={() => setActiveSub(sub.key)}
-                    className={cn(
-                      'flex min-w-[8.25rem] items-center gap-2 rounded-full border px-3 py-2 text-left transition-all',
-                      active ? `${sub.activeBg} ${sub.activeClass} shadow-sm` : 'border-transparent bg-secondary/70 text-muted-foreground'
-                    )}
-                  >
-                    <Icon className="h-4 w-4 flex-shrink-0" />
-                    <span className="min-w-0">
-                      <span className="block truncate text-xs font-semibold">{sub.label}</span>
-                      <span className="block truncate text-[10px] opacity-70">{sub.desc}</span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
         {/* Skill Category + Filter Row */}
         <div className="flex items-center border-b border-border">
           <div className="flex gap-2 overflow-x-auto px-4 py-2 flex-1 scrollbar-hide">
+            {activeMain === 'package' && (
+              <>
+                {SUB_TABS.map(sub => {
+                  const active = activeSub === sub.key;
+                  const Icon = sub.icon;
+
+                  return (
+                    <button
+                      key={sub.key}
+                      onClick={() => setActiveSub(sub.key)}
+                      className={cn(
+                        'flex flex-shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors',
+                        active ? `${sub.activeBg} ${sub.activeClass}` : 'border-transparent bg-secondary text-muted-foreground hover:bg-secondary/80'
+                      )}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      {sub.label}
+                    </button>
+                  );
+                })}
+                <div className="my-1 h-5 w-px flex-shrink-0 bg-border" />
+              </>
+            )}
             {SKILL_CATEGORIES.map(cat => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
                 className={cn(
-                  'flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs transition-colors whitespace-nowrap',
+                  'flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors whitespace-nowrap',
                   activeCategory === cat
                     ? 'bg-foreground text-background'
                     : 'bg-secondary text-foreground hover:bg-secondary/80'
