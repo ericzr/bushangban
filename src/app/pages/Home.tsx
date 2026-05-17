@@ -14,9 +14,9 @@ const MAIN_TABS: { key: MainTabKey; label: string; icon: React.ElementType }[] =
   { key: 'intern', label: '实习', icon: GraduationCap },
 ];
 
-const SUB_TABS: { key: SubTabKey; label: string; icon: React.ElementType; activeClass: string; barClass: string }[] = [
-  { key: 'long', label: '长期', icon: Clock, activeClass: 'text-amber-600', barClass: 'bg-amber-500' },
-  { key: 'short', label: '短期', icon: Package, activeClass: 'text-purple-600', barClass: 'bg-purple-500' },
+const SUB_TABS: { key: SubTabKey; label: string; desc: string; icon: React.ElementType; activeClass: string; activeBg: string }[] = [
+  { key: 'long', label: '长期', desc: '持续协作', icon: Clock, activeClass: 'text-amber-700', activeBg: 'bg-amber-50 border-amber-200' },
+  { key: 'short', label: '短期', desc: '项目/单次任务', icon: Package, activeClass: 'text-purple-700', activeBg: 'bg-purple-50 border-purple-200' },
 ];
 
 const BUDGET_OPTIONS = ['全部', '1k以下', '1k-5k', '5k-1w', '1w-5w', '5w以上'];
@@ -165,10 +165,10 @@ export function Home() {
           })}
         </div>
 
-        {/* 任务包 Sub-tabs — segmented control */}
+        {/* 任务包周期筛选 */}
         {activeMain === 'package' && (
-          <div className="px-4 py-2 border-b border-border/50">
-            <div className="grid grid-cols-2 bg-secondary rounded-xl p-0.5 gap-0">
+          <div className="border-b border-border/50 px-4 py-2.5">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
               {SUB_TABS.map(sub => {
                 const active = activeSub === sub.key;
                 const Icon = sub.icon;
@@ -178,12 +178,15 @@ export function Home() {
                     key={sub.key}
                     onClick={() => setActiveSub(sub.key)}
                     className={cn(
-                      'flex min-w-0 items-center justify-center gap-1 px-2 py-1.5 rounded-[10px] text-xs font-medium transition-all',
-                      active ? `bg-white shadow-sm ${sub.activeClass}` : 'text-muted-foreground'
+                      'flex min-w-[8.25rem] items-center gap-2 rounded-full border px-3 py-2 text-left transition-all',
+                      active ? `${sub.activeBg} ${sub.activeClass} shadow-sm` : 'border-transparent bg-secondary/70 text-muted-foreground'
                     )}
                   >
-                    <Icon className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="truncate">{sub.label}</span>
+                    <Icon className="h-4 w-4 flex-shrink-0" />
+                    <span className="min-w-0">
+                      <span className="block truncate text-xs font-semibold">{sub.label}</span>
+                      <span className="block truncate text-[10px] opacity-70">{sub.desc}</span>
+                    </span>
                   </button>
                 );
               })}

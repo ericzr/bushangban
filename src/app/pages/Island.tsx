@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { MOCK_PLANETS, MOCK_BUBBLES, WORLD_MESSAGES, MOCK_TASKS, MOCK_BOUNTY_REQUESTS, type Bubble, type Planet } from '../data/mock';
 import { cn } from '../../lib/utils';
-import { X, Zap, Send, Megaphone, ShoppingBag, Volume2, ArrowUpToLine, Image, Sparkles, Bot, BadgeDollarSign, Crown, ListChecks } from 'lucide-react';
+import { X, Zap, Send, Megaphone, ShoppingBag, Volume2, ArrowUpToLine, Image, Sparkles, Bot, BadgeDollarSign, Crown, ListChecks, MapPin, Users } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 const SHOP_ITEMS = [
@@ -81,6 +81,7 @@ export function Island() {
   const [showSentToast, setShowSentToast] = useState(false);
   const [showShop, setShowShop] = useState(false);
   const [purchasedItem, setPurchasedItem] = useState<string | null>(null);
+  const [showBountyList, setShowBountyList] = useState(false);
   const [showMemberModal, setShowMemberModal] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -188,7 +189,7 @@ export function Island() {
               ¥{topBounty.bounty}
             </span>
             <button
-              onClick={() => setShowMemberModal(true)}
+              onClick={() => setShowBountyList(true)}
               className="flex flex-shrink-0 items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-medium text-primary-foreground"
             >
               <ListChecks className="h-3 w-3" />
@@ -495,6 +496,54 @@ export function Island() {
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBountyList && (
+        <div className="fixed inset-0 z-[105] flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowBountyList(false)} />
+          <div className="relative w-full max-w-[430px] rounded-t-3xl bg-white pb-6 pt-4 animate-slide-up">
+            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-border" />
+            <div className="mb-4 flex items-center justify-between px-5">
+              <div>
+                <h2 className="text-lg font-semibold">完整悬赏榜</h2>
+                <p className="text-xs text-muted-foreground">浏览全部求职悬赏，详情需会员解锁</p>
+              </div>
+              <button onClick={() => setShowBountyList(false)} className="rounded-full p-1.5 hover:bg-secondary transition-colors">
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+            <div className="max-h-[58vh] space-y-3 overflow-y-auto px-5">
+              {MOCK_BOUNTY_REQUESTS.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setShowBountyList(false);
+                    setShowMemberModal(true);
+                  }}
+                  className="w-full rounded-2xl border border-border bg-white p-3.5 text-left transition-colors active:bg-secondary/60"
+                >
+                  <div className="mb-2 flex items-start gap-3">
+                    <img src={item.seeker.avatar} alt={item.seeker.name} className="h-10 w-10 rounded-full object-cover" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-foreground">{item.title}</p>
+                          <p className="mt-0.5 truncate text-xs text-muted-foreground">{item.seeker.name} · {item.targetRole}</p>
+                        </div>
+                        <span className="flex-shrink-0 rounded-full bg-coral-light px-2.5 py-1 text-sm font-semibold text-coral">¥{item.bounty}</span>
+                      </div>
+                      <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{item.pitch}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                    <span className="flex min-w-0 items-center gap-1 truncate"><MapPin className="h-3 w-3 flex-shrink-0" />{item.location}</span>
+                    <span className="flex flex-shrink-0 items-center gap-1"><Users className="h-3 w-3" />{item.supporters} 人助推</span>
+                  </div>
+                </button>
               ))}
             </div>
           </div>
