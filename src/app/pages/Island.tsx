@@ -190,10 +190,11 @@ export function Island() {
             </span>
             <button
               onClick={() => setShowBountyList(true)}
-              className="flex flex-shrink-0 items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-medium text-primary-foreground"
+              aria-label="查看完整悬赏榜"
+              title="查看完整悬赏榜"
+              className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"
             >
               <ListChecks className="h-3 w-3" />
-              完整榜
             </button>
           </div>
         </div>
