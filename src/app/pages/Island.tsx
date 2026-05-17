@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { MOCK_PLANETS, MOCK_BUBBLES, WORLD_MESSAGES, MOCK_TASKS, MOCK_BOUNTY_REQUESTS, type Bubble, type Planet } from '../data/mock';
 import { cn } from '../../lib/utils';
-import { X, Zap, Send, Megaphone, ShoppingBag, Volume2, ArrowUpToLine, Image, Sparkles, Bot, BadgeDollarSign, Crown } from 'lucide-react';
+import { X, Zap, Send, Megaphone, ShoppingBag, Volume2, ArrowUpToLine, Image, Sparkles, Bot, BadgeDollarSign, Crown, ListChecks } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 const SHOP_ITEMS = [
@@ -173,22 +173,29 @@ export function Island() {
 
       {/* Bounty Board */}
       {topBounty && (
-        <button
-          onClick={() => setShowMemberModal(true)}
-          className="mx-4 mb-2 overflow-hidden rounded-full bg-white/60 border border-border px-3 py-1.5 text-left active:scale-[0.99] transition-transform"
-        >
-          <div className="flex items-center gap-2">
+        <div className="mx-4 mb-2 overflow-hidden rounded-full bg-white/60 border border-border px-3 py-1.5">
+          <div className="flex items-center gap-2 min-w-0">
             <BadgeDollarSign className="h-4 w-4 flex-shrink-0 text-coral" />
-            <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
+            <button
+              onClick={() => setShowMemberModal(true)}
+              className="min-w-0 flex-1 truncate text-left text-xs text-muted-foreground"
+            >
               <span className="font-medium text-foreground">悬赏榜</span>
               <span className="mx-1 text-border">|</span>
               {topBounty.seeker.name}：{topBounty.title}
-            </p>
+            </button>
             <span className="flex-shrink-0 rounded-full bg-coral-light px-2 py-0.5 text-[11px] font-medium text-coral">
               ¥{topBounty.bounty}
             </span>
+            <button
+              onClick={() => setShowMemberModal(true)}
+              className="flex flex-shrink-0 items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-medium text-primary-foreground"
+            >
+              <ListChecks className="h-3 w-3" />
+              完整榜
+            </button>
           </div>
-        </button>
+        </div>
       )}
 
       {/* Bubble Space */}

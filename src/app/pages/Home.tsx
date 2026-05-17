@@ -2,12 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { MOCK_TASKS, MOCK_BANNERS, SKILL_CATEGORIES } from '../data/mock';
 import { TaskCard } from '../components/TaskCard';
 import { CityPickerModal } from '../components/CityPickerModal';
-import { Plus, ChevronRight, GraduationCap, Clock, Package, SlidersHorizontal, X, MapPin, DollarSign, Wifi, Zap } from 'lucide-react';
+import { Plus, ChevronRight, GraduationCap, Clock, Package, SlidersHorizontal, X, MapPin, DollarSign, Wifi } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Link, useSearchParams } from 'react-router';
 
 type MainTabKey = 'package' | 'intern';
-type SubTabKey = 'long' | 'short' | 'instant';
+type SubTabKey = 'long' | 'short';
 
 const MAIN_TABS: { key: MainTabKey; label: string; icon: React.ElementType }[] = [
   { key: 'package', label: '任务包', icon: Package },
@@ -17,7 +17,6 @@ const MAIN_TABS: { key: MainTabKey; label: string; icon: React.ElementType }[] =
 const SUB_TABS: { key: SubTabKey; label: string; icon: React.ElementType; activeClass: string; barClass: string }[] = [
   { key: 'long', label: '长期', icon: Clock, activeClass: 'text-amber-600', barClass: 'bg-amber-500' },
   { key: 'short', label: '短期', icon: Package, activeClass: 'text-purple-600', barClass: 'bg-purple-500' },
-  { key: 'instant', label: '任务', icon: Zap, activeClass: 'text-rose-600', barClass: 'bg-rose-500' },
 ];
 
 const BUDGET_OPTIONS = ['全部', '1k以下', '1k-5k', '5k-1w', '1w-5w', '5w以上'];
@@ -44,8 +43,7 @@ export function Home() {
     if (typeParam) {
       if (typeParam === 'intern') { setActiveMain('intern'); }
       else if (typeParam === 'parttime' || typeParam === 'long') { setActiveMain('package'); setActiveSub('long'); }
-      else if (typeParam === 'crowdsourcing' || typeParam === 'short') { setActiveMain('package'); setActiveSub('short'); }
-      else if (typeParam === 'agent' || typeParam === 'instant') { setActiveMain('package'); setActiveSub('instant'); }
+      else if (typeParam === 'crowdsourcing' || typeParam === 'short' || typeParam === 'agent' || typeParam === 'instant') { setActiveMain('package'); setActiveSub('short'); }
     }
   }, [searchParams]);
 
@@ -74,8 +72,7 @@ export function Home() {
     if (activeMain === 'intern' && task.type !== 'intern') return false;
     if (activeMain === 'package') {
       if (activeSub === 'long' && task.type !== 'parttime') return false;
-      if (activeSub === 'short' && task.type !== 'crowdsourcing') return false;
-      if (activeSub === 'instant' && task.type !== 'agent') return false;
+      if (activeSub === 'short' && task.type !== 'crowdsourcing' && task.type !== 'agent') return false;
     }
     if (activeCategory !== '全部' && !task.tags.includes(activeCategory)) return false;
     if (filterRegion !== '全部' && task.location !== filterRegion && task.location !== '远程') return false;
@@ -104,8 +101,7 @@ export function Home() {
       const type = banner.link.split('taskType=')[1];
       if (type === 'intern') { setActiveMain('intern'); }
       else if (type === 'parttime' || type === 'long') { setActiveMain('package'); setActiveSub('long'); }
-      else if (type === 'crowdsourcing' || type === 'short') { setActiveMain('package'); setActiveSub('short'); }
-      else if (type === 'agent' || type === 'instant') { setActiveMain('package'); setActiveSub('instant'); }
+      else if (type === 'crowdsourcing' || type === 'short' || type === 'agent' || type === 'instant') { setActiveMain('package'); setActiveSub('short'); }
     }
   };
 
@@ -151,7 +147,6 @@ export function Home() {
                 key={tab.key}
                 onClick={() => {
                   setActiveMain(tab.key);
-                  if (tab.key !== 'package') setActiveSub('all');
                 }}
                 className={cn(
                   'flex-1 flex items-center justify-center gap-1 py-2.5 text-sm font-medium relative transition-colors',
@@ -173,7 +168,7 @@ export function Home() {
         {/* 任务包 Sub-tabs — segmented control */}
         {activeMain === 'package' && (
           <div className="px-4 py-2 border-b border-border/50">
-            <div className="grid grid-cols-3 bg-secondary rounded-xl p-0.5 gap-0">
+            <div className="grid grid-cols-2 bg-secondary rounded-xl p-0.5 gap-0">
               {SUB_TABS.map(sub => {
                 const active = activeSub === sub.key;
                 const Icon = sub.icon;
