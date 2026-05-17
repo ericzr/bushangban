@@ -92,8 +92,16 @@ export function Home() {
   else if (filterSort === '预算最高') filteredTasks = [...filteredTasks].sort((a, b) => b.budgetMax - a.budgetMax);
   else if (filterSort === '匹配度最高') filteredTasks = [...filteredTasks].sort((a, b) => b.matchScore - a.matchScore);
 
-  const activeFilterCount = [filterRegion, filterBudget, filterDelivery].filter(v => v !== '全部').length + (filterSort !== '默认排序' ? 1 : 0);
-  const clearAllFilters = () => { setFilterRegion('全部'); setFilterBudget('全部'); setFilterDelivery('全部'); setFilterSort('默认排序'); };
+  const activeFilterCount = [filterRegion, filterBudget, filterDelivery].filter(v => v !== '全部').length
+    + (filterSort !== '默认排序' ? 1 : 0)
+    + (activeMain === 'package' && activeSub !== 'short' ? 1 : 0);
+  const clearAllFilters = () => {
+    setFilterRegion('全部');
+    setFilterBudget('全部');
+    setFilterDelivery('全部');
+    setFilterSort('默认排序');
+    setActiveSub('short');
+  };
   const banner = MOCK_BANNERS[bannerIdx];
 
   const handleBannerClick = () => {
@@ -202,6 +210,34 @@ export function Home() {
       {/* Filter Panel */}
       {showFilterPanel && (
         <div className="bg-white border-b border-border px-4 py-3 space-y-3 animate-slide-up">
+          {activeMain === 'package' && (
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs font-medium text-foreground">任务周期</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {SUB_TABS.map(sub => {
+                  const active = activeSub === sub.key;
+                  const Icon = sub.icon;
+
+                  return (
+                    <button
+                      key={sub.key}
+                      onClick={() => setActiveSub(sub.key)}
+                      className={cn(
+                        'flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs transition-colors',
+                        active ? `${sub.activeBg} ${sub.activeClass} font-medium` : 'bg-secondary/60 text-foreground border-transparent'
+                      )}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      {sub.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           <div>
             <div className="flex items-center gap-1.5 mb-2">
               <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
@@ -288,33 +324,21 @@ export function Home() {
               <button onClick={() => setFilterSort('默认排序')}><X className="h-3 w-3" /></button>
             </span>
           )}
+          {activeMain === 'package' && activeSub !== 'short' && (
+            <span className="flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-[11px] flex-shrink-0">
+              长期任务
+              <button onClick={() => setActiveSub('short')}><X className="h-3 w-3" /></button>
+            </span>
+          )}
           <button onClick={clearAllFilters} className="text-[11px] text-muted-foreground ml-1 flex-shrink-0">清除全部</button>
         </div>
       )}
 
       {/* Task Count */}
-      <div className="flex items-center justify-between gap-3 px-4 pt-2 pb-1">
-        <span className="text-xs text-muted-foreground">共 {filteredTasks.length} 个</span>
-        {activeMain === 'package' && (
-          <div className="flex items-center rounded-full bg-secondary p-0.5">
-            {SUB_TABS.map(sub => {
-              const active = activeSub === sub.key;
-
-              return (
-                <button
-                  key={sub.key}
-                  onClick={() => setActiveSub(sub.key)}
-                  className={cn(
-                    'rounded-full px-3 py-1 text-[11px] font-medium transition-colors',
-                    active ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'
-                  )}
-                >
-                  {sub.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
+      <div className="px-4 pt-2 pb-1">
+        <span className="text-xs text-muted-foreground">
+          共 {filteredTasks.length} 个{activeMain === 'package' ? (activeSub === 'long' ? '长期任务' : '短期任务') : '实习'}
+        </span>
       </div>
 
       {/* Task Cards */}
