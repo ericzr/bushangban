@@ -168,29 +168,6 @@ export function Home() {
         {/* Skill Category + Filter Row */}
         <div className="flex items-center border-b border-border">
           <div className="flex gap-2 overflow-x-auto px-4 py-2 flex-1 scrollbar-hide">
-            {activeMain === 'package' && (
-              <>
-                {SUB_TABS.map(sub => {
-                  const active = activeSub === sub.key;
-                  const Icon = sub.icon;
-
-                  return (
-                    <button
-                      key={sub.key}
-                      onClick={() => setActiveSub(sub.key)}
-                      className={cn(
-                        'flex flex-shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors',
-                        active ? `${sub.activeBg} ${sub.activeClass}` : 'border-transparent bg-secondary text-muted-foreground hover:bg-secondary/80'
-                      )}
-                    >
-                      <Icon className="h-3.5 w-3.5" />
-                      {sub.label}
-                    </button>
-                  );
-                })}
-                <div className="my-1 h-5 w-px flex-shrink-0 bg-border" />
-              </>
-            )}
             {SKILL_CATEGORIES.map(cat => (
               <button
                 key={cat}
@@ -316,8 +293,28 @@ export function Home() {
       )}
 
       {/* Task Count */}
-      <div className="px-4 pt-1 pb-1">
+      <div className="flex items-center justify-between gap-3 px-4 pt-2 pb-1">
         <span className="text-xs text-muted-foreground">共 {filteredTasks.length} 个</span>
+        {activeMain === 'package' && (
+          <div className="flex items-center rounded-full bg-secondary p-0.5">
+            {SUB_TABS.map(sub => {
+              const active = activeSub === sub.key;
+
+              return (
+                <button
+                  key={sub.key}
+                  onClick={() => setActiveSub(sub.key)}
+                  className={cn(
+                    'rounded-full px-3 py-1 text-[11px] font-medium transition-colors',
+                    active ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'
+                  )}
+                >
+                  {sub.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Task Cards */}
