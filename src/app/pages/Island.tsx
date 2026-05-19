@@ -479,61 +479,59 @@ export function Island() {
                 <span key={tag} className="rounded-full bg-secondary px-2.5 py-0.5 text-xs text-foreground">{tag}</span>
               ))}
             </div>
-            <div className="flex gap-3">
+            {selectedBubble.type === 'bounty' ? (
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setSelectedBubble(null);
-                  if (selectedBubble.type === 'talent') navigate(`/talent/${selectedBubble.refId}`);
-                  else if (selectedBubble.type === 'bounty') setShowMemberModal(true);
-                  else navigate(`/task/${selectedBubble.refId}`);
+                  setShowMemberModal(true);
                 }}
-                className="flex-1 rounded-xl bg-secondary py-2.5 text-sm text-foreground hover:bg-secondary/80 transition-colors"
+                className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-secondary py-2.5 text-sm text-foreground transition-colors hover:bg-secondary/80"
               >
-                查看详情
+                <Crown className="h-4 w-4 text-coral" />
+                <span>查看详情</span>
               </button>
-              {(() => {
-                if (selectedBubble.type === 'bounty') {
-                  const bounty = MOCK_BOUNTY_REQUESTS.find(item => item.id === selectedBubble.refId);
+            ) : (
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setSelectedBubble(null);
+                    if (selectedBubble.type === 'talent') navigate(`/talent/${selectedBubble.refId}`);
+                    else navigate(`/task/${selectedBubble.refId}`);
+                  }}
+                  className="flex-1 rounded-xl bg-secondary py-2.5 text-sm text-foreground transition-colors hover:bg-secondary/80"
+                >
+                  查看详情
+                </button>
+                {(() => {
+                  const refTask = MOCK_TASKS.find(t => t.id === selectedBubble.refId);
+                  const isInstantType = selectedBubble.type === 'agent' || (refTask && refTask.type === 'crowdsourcing');
 
-                  return (
+                  return isInstantType ? (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
+                        const refId = selectedBubble.refId;
                         setSelectedBubble(null);
-                        setShowMemberModal(true);
+                        navigate(`/task/${refId}?accept=1`);
                       }}
-                      className="flex-1 rounded-xl bg-sky-500 py-2.5 text-sm font-medium text-white transition-colors hover:bg-sky-600"
+                      className={cn('flex-1 rounded-xl py-2.5 text-sm font-medium text-white transition-colors',
+                        selectedBubble.type === 'agent' ? 'bg-rose-500 hover:bg-rose-600' : 'bg-teal-500 hover:bg-teal-600'
+                      )}
                     >
-                      {bounty ? `¥${bounty.bounty} 查看详情` : '查看详情'}
+                      接单
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => { setSelectedBubble(null); navigate('/messages'); }}
+                      className="flex-1 rounded-xl bg-primary py-2.5 text-sm text-primary-foreground hover:bg-primary/80 transition-colors"
+                    >
+                      立即沟通
                     </button>
                   );
-                }
-                const refTask = selectedBubble.type !== 'talent' ? MOCK_TASKS.find(t => t.id === selectedBubble.refId) : null;
-                const isInstantType = selectedBubble.type === 'agent' || (refTask && refTask.type === 'crowdsourcing');
-                return isInstantType ? (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const refId = selectedBubble.refId;
-                      setSelectedBubble(null);
-                      navigate(`/task/${refId}?accept=1`);
-                    }}
-                    className={cn('flex-1 rounded-xl py-2.5 text-sm font-medium text-white transition-colors',
-                      selectedBubble.type === 'agent' ? 'bg-rose-500 hover:bg-rose-600' : 'bg-teal-500 hover:bg-teal-600'
-                    )}
-                  >
-                    接单
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => { setSelectedBubble(null); navigate('/messages'); }}
-                    className="flex-1 rounded-xl bg-primary py-2.5 text-sm text-primary-foreground hover:bg-primary/80 transition-colors"
-                  >
-                    立即沟通
-                  </button>
-                );
-              })()}
-            </div>
+                })()}
+              </div>
+            )}
           </div>
         </div>
       )}
