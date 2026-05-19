@@ -194,14 +194,14 @@ export function Home() {
           <button
             onClick={() => setShowFilterPanel(!showFilterPanel)}
             className={cn(
-              'flex items-center gap-1 px-3 py-1.5 mr-3 rounded-full text-xs transition-colors flex-shrink-0 border',
-              activeFilterCount > 0 ? 'bg-primary/10 text-primary border-primary/30' : 'bg-secondary text-foreground border-transparent'
+              'relative mr-3 flex flex-shrink-0 items-center gap-1.5 border-l border-border pl-3 pr-0 py-1.5 text-xs font-medium transition-colors',
+              activeFilterCount > 0 || showFilterPanel ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
             )}
           >
             <SlidersHorizontal className="h-3.5 w-3.5" />
             <span>筛选</span>
             {activeFilterCount > 0 && (
-              <span className="ml-0.5 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center">{activeFilterCount}</span>
+              <span className="-ml-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">{activeFilterCount}</span>
             )}
           </button>
         </div>
