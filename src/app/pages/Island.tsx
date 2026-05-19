@@ -37,38 +37,60 @@ const SHOP_ITEMS = [
   },
 ];
 
-const BUBBLE_STYLE: Record<Bubble['type'], { bg: string; ring: string; label: string; labelBg: string; dotColor: string; shadowColor: string }> = {
+const BUBBLE_STYLE: Record<Bubble['type'], {
+  shell: string;
+  halo: string;
+  ring: string;
+  label: string;
+  labelBg: string;
+  labelText: string;
+  shadowColor: string;
+  iconClass: string;
+  titleClass: string;
+}> = {
   talent: {
-    bg: 'bg-emerald-50/90',
-    ring: 'ring-emerald-200',
+    shell: 'bg-white/85',
+    halo: 'bg-emerald-100/70',
+    ring: 'ring-emerald-200/80',
     label: '求职者',
-    labelBg: 'bg-emerald-500 text-white',
-    dotColor: 'bg-emerald-400',
-    shadowColor: 'rgba(16,185,129,0.2)',
+    labelBg: 'bg-emerald-500/90',
+    labelText: 'text-white',
+    shadowColor: 'rgba(16,185,129,0.14)',
+    iconClass: 'text-emerald-600',
+    titleClass: 'text-emerald-700',
   },
   task: {
-    bg: 'bg-amber-50/90',
-    ring: 'ring-amber-200',
+    shell: 'bg-white/85',
+    halo: 'bg-amber-100/70',
+    ring: 'ring-amber-200/80',
     label: '任务',
-    labelBg: 'bg-amber-500 text-white',
-    dotColor: 'bg-amber-400',
-    shadowColor: 'rgba(245,158,11,0.2)',
+    labelBg: 'bg-amber-500/90',
+    labelText: 'text-white',
+    shadowColor: 'rgba(245,158,11,0.14)',
+    iconClass: 'text-amber-600',
+    titleClass: 'text-amber-700',
   },
   agent: {
-    bg: 'bg-rose-50/90',
-    ring: 'ring-rose-200',
+    shell: 'bg-white/85',
+    halo: 'bg-rose-100/70',
+    ring: 'ring-rose-200/80',
     label: '即时',
-    labelBg: 'bg-rose-500 text-white',
-    dotColor: 'bg-rose-400',
-    shadowColor: 'rgba(244,63,94,0.2)',
+    labelBg: 'bg-rose-500/90',
+    labelText: 'text-white',
+    shadowColor: 'rgba(244,63,94,0.14)',
+    iconClass: 'text-rose-600',
+    titleClass: 'text-rose-700',
   },
   bounty: {
-    bg: 'bg-sky-50/90',
-    ring: 'ring-sky-200',
+    shell: 'bg-white/85',
+    halo: 'bg-sky-100/70',
+    ring: 'ring-sky-200/80',
     label: '悬赏',
-    labelBg: 'bg-sky-500 text-white',
-    dotColor: 'bg-sky-400',
-    shadowColor: 'rgba(14,165,233,0.22)',
+    labelBg: 'bg-sky-500/90',
+    labelText: 'text-white',
+    shadowColor: 'rgba(14,165,233,0.14)',
+    iconClass: 'text-sky-600',
+    titleClass: 'text-sky-700',
   },
 };
 
@@ -78,6 +100,13 @@ const STROKE_COLORS: Record<Bubble['type'], { track: string; progress: string }>
   agent:   { track: 'rgba(244,63,94,0.15)',  progress: '#f43f5e' },
   bounty:  { track: 'rgba(14,165,233,0.15)', progress: '#0ea5e9' },
 };
+
+const LEGEND_ITEMS: { type: Bubble['type']; label: string }[] = [
+  { type: 'talent', label: '求职者' },
+  { type: 'task', label: '任务' },
+  { type: 'agent', label: '即时' },
+  { type: 'bounty', label: '悬赏' },
+];
 
 export function Island() {
   const navigate = useNavigate();
@@ -212,13 +241,27 @@ export function Island() {
       {/* Bubble Space */}
       <div
         className="relative flex-1 overflow-hidden pt-3"
-        style={{ background: `radial-gradient(ellipse at center, ${selectedPlanet.color}15 0%, ${selectedPlanet.color}05 50%, transparent 80%)` }}
+        style={{
+          background: [
+            `radial-gradient(circle at 50% 42%, ${selectedPlanet.color}18 0%, transparent 42%)`,
+            'radial-gradient(circle at 18% 24%, rgba(255,255,255,0.95) 0%, transparent 24%)',
+            'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(249,250,251,0.92) 48%, rgba(255,255,255,0.96) 100%)',
+          ].join(', '),
+        }}
       >
+        <div
+          className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed opacity-25"
+          style={{ borderColor: selectedPlanet.color }}
+        />
+        <div
+          className="pointer-events-none absolute left-1/2 top-1/2 h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full border opacity-15"
+          style={{ borderColor: selectedPlanet.color }}
+        />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {[...Array(30)].map((_, i) => (
             <div
               key={i}
-              className="absolute rounded-full bg-primary/10"
+              className="absolute rounded-full bg-slate-300/30"
               style={{
                 width: Math.random() * 3 + 1,
                 height: Math.random() * 3 + 1,
@@ -236,8 +279,8 @@ export function Island() {
           if (!visibleBubbles.has(bubble.id)) return null;
           const style = BUBBLE_STYLE[bubble.type];
           const stroke = STROKE_COLORS[bubble.type];
-          const baseSize = bubble.type === 'agent' ? 52 : bubble.type === 'talent' ? 44 : bubble.type === 'bounty' ? 50 : 50;
-          const size = baseSize + bubble.matchScore * 0.4;
+          const baseSize = bubble.type === 'talent' ? 42 : 46;
+          const size = baseSize + bubble.matchScore * 0.32;
           const pos = BUBBLE_POSITIONS[index % BUBBLE_POSITIONS.length];
           const floatDuration = 5 + (index % 4) * 1.5;
           const isEntering = enteringId === bubble.id;
@@ -257,8 +300,9 @@ export function Island() {
               key={bubble.id}
               onClick={() => setSelectedBubble(bubble)}
               className={cn(
-                'absolute rounded-full flex items-center justify-center cursor-pointer shadow-sm hover:scale-110 active:scale-95',
-                style.bg,
+                'absolute rounded-full flex items-center justify-center cursor-pointer border border-white/80 ring-1 backdrop-blur-md transition-all duration-300 hover:scale-110 active:scale-95',
+                style.shell,
+                style.ring,
                 isEntering && 'animate-[bubble-pop_0.6s_ease-out]'
               )}
               style={{
@@ -268,32 +312,36 @@ export function Island() {
                 top: `calc(${pos.y}% - ${size / 2}px)`,
                 animation: `bubble-drift-${index % 3} ${floatDuration}s ease-in-out infinite`,
                 opacity: isEntering ? undefined : 1,
-                boxShadow: `0 3px 14px ${style.shadowColor}`,
+                backgroundImage: 'linear-gradient(145deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.74) 100%)',
+                boxShadow: `0 10px 24px ${style.shadowColor}, inset 0 1px 0 rgba(255,255,255,0.85)`,
               }}
             >
+              <div className={cn('absolute inset-[10%] rounded-full blur-xl opacity-80', style.halo)} />
               <svg
                 className="absolute inset-0 -rotate-90"
                 width={svgSize}
                 height={svgSize}
                 style={{ left: -(svgSize - size) / 2, top: -(svgSize - size) / 2 }}
               >
-                <circle cx={svgSize / 2} cy={svgSize / 2} r={radius} fill="none" stroke={stroke.track} strokeWidth={2.5} />
-                <circle cx={svgSize / 2} cy={svgSize / 2} r={radius} fill="none" stroke={stroke.progress} strokeWidth={2.5} strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={progressOffset} style={{ transition: 'stroke-dashoffset 0.8s ease-out' }} />
+                <circle cx={svgSize / 2} cy={svgSize / 2} r={radius} fill="none" stroke={stroke.track} strokeWidth={2.2} />
+                <circle cx={svgSize / 2} cy={svgSize / 2} r={radius} fill="none" stroke={stroke.progress} strokeWidth={2.2} strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={progressOffset} style={{ transition: 'stroke-dashoffset 0.8s ease-out' }} />
               </svg>
 
-              {bubble.avatar ? (
-                <img src={bubble.avatar} alt={bubble.title} className="h-[60%] w-[60%] rounded-full object-cover ring-2 ring-white/70" />
-              ) : bubble.type === 'agent' ? (
-                <Bot className="h-[45%] w-[45%] text-rose-500" />
-              ) : bubble.type === 'bounty' ? (
-                <BadgeDollarSign className="h-[46%] w-[46%] text-sky-500" />
-              ) : (
-                <span className={cn('text-[10px] text-center px-1 leading-tight font-medium', isTalent ? 'text-emerald-700' : 'text-amber-700')}>
-                  {bubble.title.length > 4 ? bubble.title.slice(0, 4) + '…' : bubble.title}
-                </span>
-              )}
+              <div className="relative z-10 flex h-full w-full items-center justify-center">
+                {bubble.avatar ? (
+                  <img src={bubble.avatar} alt={bubble.title} className="h-[60%] w-[60%] rounded-full object-cover ring-2 ring-white/80 shadow-sm" />
+                ) : bubble.type === 'agent' ? (
+                  <Bot className={cn('h-[45%] w-[45%]', style.iconClass)} />
+                ) : bubble.type === 'bounty' ? (
+                  <BadgeDollarSign className={cn('h-[46%] w-[46%]', style.iconClass)} />
+                ) : (
+                  <span className={cn('px-1 text-center text-[10px] font-medium leading-tight', style.titleClass)}>
+                    {bubble.title.length > 4 ? bubble.title.slice(0, 4) + '…' : bubble.title}
+                  </span>
+                )}
+              </div>
 
-              <span className={cn('absolute -bottom-1.5 left-1/2 -translate-x-1/2 rounded-full px-1.5 py-px text-[8px] whitespace-nowrap shadow-sm', style.labelBg)}>
+              <span className={cn('absolute -bottom-1.5 left-1/2 -translate-x-1/2 rounded-full border border-white/75 px-1.5 py-px text-[8px] whitespace-nowrap shadow-sm', style.labelBg, style.labelText)}>
                 {isTalent ? shortName : style.label}
               </span>
             </button>
@@ -305,20 +353,20 @@ export function Island() {
           onClick={handleSmartMatch}
           className={cn(
             'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10',
-            'h-16 w-16 rounded-full bg-primary flex items-center justify-center shadow-lg hover:scale-110 transition-transform',
+            'h-16 w-16 rounded-full border border-white/80 bg-slate-950/90 flex items-center justify-center shadow-[0_18px_40px_rgba(15,23,42,0.22)] ring-4 ring-white/70 hover:scale-110 transition-transform',
             showMatchAnim && 'animate-ping'
           )}
         >
-          <Zap className="h-7 w-7 text-primary-foreground" />
+          <Zap className="h-7 w-7 text-white" />
         </button>
 
         {showMatchAnim && (
           <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
             <div className="flex flex-col items-center gap-2 animate-bounce">
               <div className="flex items-center gap-4">
-                <div className="h-14 w-14 rounded-full bg-success/60 backdrop-blur-sm animate-pulse" />
+                <div className="h-14 w-14 rounded-full bg-white/70 backdrop-blur-sm ring-2 ring-emerald-200 animate-pulse" />
                 <span className="text-2xl">💫</span>
-                <div className="h-14 w-14 rounded-full bg-primary/10 backdrop-blur-sm animate-pulse" />
+                <div className="h-14 w-14 rounded-full bg-white/70 backdrop-blur-sm ring-2 ring-rose-200 animate-pulse" />
               </div>
               <span className="rounded-full bg-white/90 px-4 py-1.5 text-sm text-foreground shadow-md">正在为你智能匹配...</span>
             </div>
@@ -329,22 +377,20 @@ export function Island() {
       {/* Legend + Shop Row */}
       <div className="fixed left-0 right-0 z-31 flex items-center justify-between px-4 py-1.5 bg-white/70 backdrop-blur-sm" style={{ bottom: 'calc(4rem + 6rem)' }}>
         <div className="flex min-w-0 flex-1 items-center gap-3 overflow-x-auto pr-3 scrollbar-hide">
-          <div className="flex flex-shrink-0 items-center gap-1.5">
-            <div className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-            <span className="text-[11px] text-muted-foreground">求职者</span>
-          </div>
-          <div className="flex flex-shrink-0 items-center gap-1.5">
-            <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-            <span className="text-[11px] text-muted-foreground">任务</span>
-          </div>
-          <div className="flex flex-shrink-0 items-center gap-1.5">
-            <div className="h-2.5 w-2.5 rounded-full bg-rose-400" />
-            <span className="text-[11px] text-muted-foreground">即时</span>
-          </div>
-          <div className="flex flex-shrink-0 items-center gap-1.5">
-            <div className="h-2.5 w-2.5 rounded-full bg-sky-400" />
-            <span className="text-[11px] text-muted-foreground">悬赏</span>
-          </div>
+          {LEGEND_ITEMS.map(item => {
+            const style = BUBBLE_STYLE[item.type];
+            const stroke = STROKE_COLORS[item.type];
+
+            return (
+              <div key={item.type} className="flex flex-shrink-0 items-center gap-1.5">
+                <span
+                  className="h-2.5 w-2.5 rounded-full ring-2 ring-white/80"
+                  style={{ backgroundColor: stroke.progress, boxShadow: `0 0 12px ${style.shadowColor}` }}
+                />
+                <span className="text-[11px] text-muted-foreground">{item.label}</span>
+              </div>
+            );
+          })}
         </div>
         <button
           onClick={() => setShowShop(true)}
@@ -398,17 +444,19 @@ export function Island() {
             <button onClick={() => setSelectedBubble(null)} className="absolute right-4 top-4 rounded-full bg-secondary p-1.5"><X className="h-4 w-4 text-muted-foreground" /></button>
             <div className="flex items-center gap-3 mb-3">
               {selectedBubble.avatar ? (
-                <img src={selectedBubble.avatar} alt="" className="h-12 w-12 rounded-2xl object-cover" />
+                <div className={cn('rounded-2xl p-0.5 ring-1', BUBBLE_STYLE[selectedBubble.type].ring)}>
+                  <img src={selectedBubble.avatar} alt="" className="h-12 w-12 rounded-[0.9rem] object-cover" />
+                </div>
               ) : selectedBubble.type === 'agent' ? (
-                <div className="h-12 w-12 rounded-2xl bg-rose-50 flex items-center justify-center">
-                  <Bot className="h-6 w-6 text-rose-500" />
+                <div className={cn('h-12 w-12 rounded-2xl flex items-center justify-center ring-1', BUBBLE_STYLE[selectedBubble.type].halo, BUBBLE_STYLE[selectedBubble.type].ring)}>
+                  <Bot className={cn('h-6 w-6', BUBBLE_STYLE[selectedBubble.type].iconClass)} />
                 </div>
               ) : selectedBubble.type === 'bounty' ? (
-                <div className="h-12 w-12 rounded-2xl bg-sky-50 flex items-center justify-center">
-                  <BadgeDollarSign className="h-6 w-6 text-sky-500" />
+                <div className={cn('h-12 w-12 rounded-2xl flex items-center justify-center ring-1', BUBBLE_STYLE[selectedBubble.type].halo, BUBBLE_STYLE[selectedBubble.type].ring)}>
+                  <BadgeDollarSign className={cn('h-6 w-6', BUBBLE_STYLE[selectedBubble.type].iconClass)} />
                 </div>
               ) : (
-                <div className={cn('h-12 w-12 rounded-2xl flex items-center justify-center', selectedBubble.type === 'task' ? 'bg-primary/10' : 'bg-success/30')}>
+                <div className={cn('h-12 w-12 rounded-2xl flex items-center justify-center ring-1', BUBBLE_STYLE[selectedBubble.type].halo, BUBBLE_STYLE[selectedBubble.type].ring)}>
                   <span>{selectedBubble.type === 'task' ? '📋' : '👤'}</span>
                 </div>
               )}
@@ -416,11 +464,9 @@ export function Island() {
                 <h3 className="text-base text-foreground">{selectedBubble.title}</h3>
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className={cn(
-                    'rounded-full px-2 py-0.5 text-xs',
-                    selectedBubble.type === 'talent' ? 'bg-success/20 text-success'
-                      : selectedBubble.type === 'agent' ? 'bg-rose-100 text-rose-600'
-                      : selectedBubble.type === 'bounty' ? 'bg-sky-100 text-sky-600'
-                      : 'bg-primary/10 text-foreground'
+                    'rounded-full px-2 py-0.5 text-xs font-medium',
+                    BUBBLE_STYLE[selectedBubble.type].halo,
+                    BUBBLE_STYLE[selectedBubble.type].titleClass
                   )}>
                     {selectedBubble.type === 'talent' ? '接任务' : selectedBubble.type === 'agent' ? '任务' : selectedBubble.type === 'bounty' ? '求职悬赏' : '找人做'}
                   </span>
