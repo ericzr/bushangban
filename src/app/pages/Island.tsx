@@ -62,12 +62,21 @@ const BUBBLE_STYLE: Record<Bubble['type'], { bg: string; ring: string; label: st
     dotColor: 'bg-rose-400',
     shadowColor: 'rgba(244,63,94,0.2)',
   },
+  bounty: {
+    bg: 'bg-sky-50/90',
+    ring: 'ring-sky-200',
+    label: '悬赏',
+    labelBg: 'bg-sky-500 text-white',
+    dotColor: 'bg-sky-400',
+    shadowColor: 'rgba(14,165,233,0.22)',
+  },
 };
 
 const STROKE_COLORS: Record<Bubble['type'], { track: string; progress: string }> = {
   talent:  { track: 'rgba(16,185,129,0.15)', progress: '#10b981' },
   task:    { track: 'rgba(245,158,11,0.15)', progress: '#f59e0b' },
   agent:   { track: 'rgba(244,63,94,0.15)',  progress: '#f43f5e' },
+  bounty:  { track: 'rgba(14,165,233,0.15)', progress: '#0ea5e9' },
 };
 
 export function Island() {
@@ -227,7 +236,7 @@ export function Island() {
           if (!visibleBubbles.has(bubble.id)) return null;
           const style = BUBBLE_STYLE[bubble.type];
           const stroke = STROKE_COLORS[bubble.type];
-          const baseSize = bubble.type === 'agent' ? 52 : bubble.type === 'talent' ? 44 : 50;
+          const baseSize = bubble.type === 'agent' ? 52 : bubble.type === 'talent' ? 44 : bubble.type === 'bounty' ? 50 : 50;
           const size = baseSize + bubble.matchScore * 0.4;
           const pos = BUBBLE_POSITIONS[index % BUBBLE_POSITIONS.length];
           const floatDuration = 5 + (index % 4) * 1.5;
@@ -276,6 +285,8 @@ export function Island() {
                 <img src={bubble.avatar} alt={bubble.title} className="h-[60%] w-[60%] rounded-full object-cover ring-2 ring-white/70" />
               ) : bubble.type === 'agent' ? (
                 <Bot className="h-[45%] w-[45%] text-rose-500" />
+              ) : bubble.type === 'bounty' ? (
+                <BadgeDollarSign className="h-[46%] w-[46%] text-sky-500" />
               ) : (
                 <span className={cn('text-[10px] text-center px-1 leading-tight font-medium', isTalent ? 'text-emerald-700' : 'text-amber-700')}>
                   {bubble.title.length > 4 ? bubble.title.slice(0, 4) + '…' : bubble.title}
@@ -317,23 +328,27 @@ export function Island() {
 
       {/* Legend + Shop Row */}
       <div className="fixed left-0 right-0 z-31 flex items-center justify-between px-4 py-1.5 bg-white/70 backdrop-blur-sm" style={{ bottom: 'calc(4rem + 6rem)' }}>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5">
+        <div className="flex min-w-0 flex-1 items-center gap-3 overflow-x-auto pr-3 scrollbar-hide">
+          <div className="flex flex-shrink-0 items-center gap-1.5">
             <div className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
             <span className="text-[11px] text-muted-foreground">求职者</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-shrink-0 items-center gap-1.5">
             <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
             <span className="text-[11px] text-muted-foreground">任务</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-shrink-0 items-center gap-1.5">
             <div className="h-2.5 w-2.5 rounded-full bg-rose-400" />
             <span className="text-[11px] text-muted-foreground">即时</span>
+          </div>
+          <div className="flex flex-shrink-0 items-center gap-1.5">
+            <div className="h-2.5 w-2.5 rounded-full bg-sky-400" />
+            <span className="text-[11px] text-muted-foreground">悬赏</span>
           </div>
         </div>
         <button
           onClick={() => setShowShop(true)}
-          className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-sm transition-transform active:scale-95"
+          className="flex flex-shrink-0 items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-sm transition-transform active:scale-95"
         >
           <ShoppingBag className="h-3.5 w-3.5" />
           商城
@@ -388,6 +403,10 @@ export function Island() {
                 <div className="h-12 w-12 rounded-2xl bg-rose-50 flex items-center justify-center">
                   <Bot className="h-6 w-6 text-rose-500" />
                 </div>
+              ) : selectedBubble.type === 'bounty' ? (
+                <div className="h-12 w-12 rounded-2xl bg-sky-50 flex items-center justify-center">
+                  <BadgeDollarSign className="h-6 w-6 text-sky-500" />
+                </div>
               ) : (
                 <div className={cn('h-12 w-12 rounded-2xl flex items-center justify-center', selectedBubble.type === 'task' ? 'bg-primary/10' : 'bg-success/30')}>
                   <span>{selectedBubble.type === 'task' ? '📋' : '👤'}</span>
@@ -400,9 +419,10 @@ export function Island() {
                     'rounded-full px-2 py-0.5 text-xs',
                     selectedBubble.type === 'talent' ? 'bg-success/20 text-success'
                       : selectedBubble.type === 'agent' ? 'bg-rose-100 text-rose-600'
+                      : selectedBubble.type === 'bounty' ? 'bg-sky-100 text-sky-600'
                       : 'bg-primary/10 text-foreground'
                   )}>
-                    {selectedBubble.type === 'talent' ? '接任务' : selectedBubble.type === 'agent' ? '任务' : '找人做'}
+                    {selectedBubble.type === 'talent' ? '接任务' : selectedBubble.type === 'agent' ? '任务' : selectedBubble.type === 'bounty' ? '求职悬赏' : '找人做'}
                   </span>
                   <span className="flex items-center gap-0.5 text-xs text-success"><Sparkles className="h-3 w-3" /> 匹配 {selectedBubble.matchScore}%</span>
                 </div>
@@ -418,6 +438,7 @@ export function Island() {
                 onClick={() => {
                   setSelectedBubble(null);
                   if (selectedBubble.type === 'talent') navigate(`/talent/${selectedBubble.refId}`);
+                  else if (selectedBubble.type === 'bounty') setShowMemberModal(true);
                   else navigate(`/task/${selectedBubble.refId}`);
                 }}
                 className="flex-1 rounded-xl bg-secondary py-2.5 text-sm text-foreground hover:bg-secondary/80 transition-colors"
@@ -425,6 +446,22 @@ export function Island() {
                 查看详情
               </button>
               {(() => {
+                if (selectedBubble.type === 'bounty') {
+                  const bounty = MOCK_BOUNTY_REQUESTS.find(item => item.id === selectedBubble.refId);
+
+                  return (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedBubble(null);
+                        setShowMemberModal(true);
+                      }}
+                      className="flex-1 rounded-xl bg-sky-500 py-2.5 text-sm font-medium text-white transition-colors hover:bg-sky-600"
+                    >
+                      {bounty ? `¥${bounty.bounty} 查看详情` : '查看详情'}
+                    </button>
+                  );
+                }
                 const refTask = selectedBubble.type !== 'talent' ? MOCK_TASKS.find(t => t.id === selectedBubble.refId) : null;
                 const isInstantType = selectedBubble.type === 'agent' || (refTask && refTask.type === 'crowdsourcing');
                 return isInstantType ? (

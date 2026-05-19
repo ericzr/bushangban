@@ -522,7 +522,7 @@ export const MOCK_PLANETS: Planet[] = [
 
 export interface Bubble {
   id: string;
-  type: 'talent' | 'task' | 'agent';
+  type: 'talent' | 'task' | 'agent' | 'bounty';
   title: string;
   matchScore: number;
   avatar?: string;
@@ -575,6 +575,9 @@ export const MOCK_BUBBLES: Bubble[] = [
   { id: 'b34', type: 'agent', title: '电话回访客户', matchScore: 70, tags: ['电话', '客服'], refId: 't12', planetId: 'p7' },
   { id: 'b35', type: 'talent', title: '李明', matchScore: 72, avatar: users[1].avatar, tags: ['全能接单'], refId: 'tal2', planetId: 'p7' },
   { id: 'b36', type: 'talent', title: '张艾米', matchScore: 68, avatar: users[2].avatar, tags: ['线下跑腿'], refId: 'tal3', planetId: 'p7' },
+  { id: 'b37', type: 'bounty', title: '远程产品运营实习', matchScore: 91, tags: ['悬赏榜', '产品运营'], refId: 'br1', planetId: 'p7' },
+  { id: 'b38', type: 'bounty', title: 'AI产品设计实习', matchScore: 87, tags: ['悬赏榜', 'AI产品'], refId: 'br2', planetId: 'p7' },
+  { id: 'b39', type: 'bounty', title: '前端实习面试机会', matchScore: 83, tags: ['悬赏榜', '前端'], refId: 'br3', planetId: 'p7' },
 ];
 
 // ─── 技能与分类 ────────────────────────────────────────────
